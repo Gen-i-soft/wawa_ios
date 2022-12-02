@@ -1,0 +1,68 @@
+wawa@w.com
+123456
+
+AR00419@wawa.com
+000000  xxx
+
+employeeCode
+"AR00419"
+
+
+flutter run -d chrome --web-renderer html
+flutter clean
+flutter build web --web-renderer html --release
+
+***กรณี login แล้ว
+firebase login
+firebase logout
+firebase deploy --only hosting
+เสร็จแล้วจ้า ....กรณี update ไม่ต้องใช้คำสั่ง firebase init  แค่นี้ก็ worked จ้าหากินมาหลายพันรอบล่ะ
+
+
+
+firebase init    
+ืn/ n / n
+firebase deploy --only hosting
+
+…or create a new repository on the command line
+echo "# wawa_ios" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/Gen-i-soft/wawa_ios.git
+git push -u origin main
+
+…or push an existing repository from the command line
+git remote add origin https://github.com/Gen-i-soft/wawa_ios.git
+git branch -M main
+git push -u origin main
+
+รายงาน  >>>ประวัติการสั่ง
+ระบบข้อความ
+ช่องสำหรับใส่ lat, lng
+
+ระบบหลังบ้าน >> 10,000
+
+time desc
+
+
+****admin wawa_shop app ขอทดสอบระบบครับ ไม่ต้องจัดสินค้านะครับผม
+***admin WAWA app กำลังทดสอบระบบ ไม่ต้องจัดสินค้านะครับ
+
+Access to XMLHttpRequest at
+'http://43.229.149.11:8080/SMLJavaRESTService/restapi/sales/quotation'
+from origin 'http://localhost:64847'
+ has been blocked by CORS policy: Request header field provider is not allowed by Access-Control-Allow-Headers in preflight response.
+
+
+
+Access to XMLHttpRequest at
+from origin
+has been blocked by CORS policy: Request header field provider is not allowed by Access-Control-Allow-Headers in preflight response.
+เหตุผลที่น่าจะทำให้ส่งไม่ได้
+wawa@w.com มี 2 อันกรรม
+employeeCode เป็น null
+
+
+
