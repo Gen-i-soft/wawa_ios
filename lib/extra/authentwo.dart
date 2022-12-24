@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:wawa/global.dart';
 
 //import 'package:wawa/states/syn_data_to_firebase.dart';
 //import 'package:wawa/states/home.dart';
@@ -18,6 +19,8 @@ import 'package:wawa/utility/my_style.dart';
 //import 'utility/sqlite_helper.dart';
 
 class AuthenTwo extends StatefulWidget {
+  const AuthenTwo({Key? key}) : super(key: key);
+
   @override
   _AuthenTwoState createState() => _AuthenTwoState();
 }
@@ -80,7 +83,7 @@ class _AuthenTwoState extends State<AuthenTwo> {
       // resizeToAvoidBottomInset: false,
       // floatingActionButton: buildCreateAccount(),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -303,11 +306,11 @@ class _AuthenTwoState extends State<AuthenTwo> {
   Widget buildLogin() {
     return Container(
       height: 60,
-      margin: EdgeInsets.only(top: 16),
+      margin: const EdgeInsets.only(top: 16),
       width: screen * 0.5,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          primary: Color(0xffA97474),
+          backgroundColor: const Color(0xffA97474),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         ),
@@ -338,7 +341,10 @@ class _AuthenTwoState extends State<AuthenTwo> {
           .then((value2) async {
       //  Navigator.of(context).pop();
         print('################################value2==>${value2.user!.uid}');
-        helper.setStorage('uid', value2.user!.uid);
+        helper.setStorage('uid', value2.user!.uid);  //set uid***
+        setState(() {
+          uid = value2.user!.uid;
+        });
          String? token = await helper.getStorage('token');
         if (token != null){
            QuerySnapshot qsDashboard = await dbRef

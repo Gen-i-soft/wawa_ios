@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wawa/widget/productitembox.dart';
 
 class MyStyle {
@@ -15,6 +16,9 @@ class MyStyle {
     return Column(
       children: [
         ListTile(onTap: () async {
+          SharedPreferences preferences = await SharedPreferences.getInstance();
+          await preferences.clear(); //clear uid****
+
           await Firebase.initializeApp().then((value) async {
             await FirebaseAuth.instance.signOut().then((value) =>
                 Navigator.pushNamedAndRemoveUntil(

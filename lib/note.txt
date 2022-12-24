@@ -64,5 +64,7 @@ has been blocked by CORS policy: Request header field provider is not allowed by
 wawa@w.com มี 2 อันกรรม
 employeeCode เป็น null
 
-
-
+####e.toString()>>>==NoSuchMethodError: 'length' === price_formulas = null ***
+####e.toString()>>>==NoSuchMethodError: '[]' === image null***
+####e.toString()>>>==DioError [DioErrorType.response]: XMLHttpRequest error.
+เจอแล้วเทคนิค sync ไม่ เบรค

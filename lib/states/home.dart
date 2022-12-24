@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:wawa/authen.dart';
 import 'package:wawa/backend/admin/adminhomepage.dart';
+import 'package:wawa/global.dart';
 import 'package:wawa/states/chat_page.dart';
 import 'package:wawa/states/product_page.dart';
 import 'package:wawa/states/promotion.dart';
@@ -35,7 +36,7 @@ class _HomePageState extends State<HomePage> {
   String? nameLogin;
   String? emailLogin;
   final dbRef = FirebaseFirestore.instance;
-  String uid = 'user';
+  // String uid = 'user';
   String? userName;
   String? userEmail;
   num noVersion = 38;
@@ -43,6 +44,8 @@ class _HomePageState extends State<HomePage> {
   ///***** */
   num sqliteDB = 1;
   String? typeUser;
+  String? employeeCode;
+
 
   // Future<Null> _makePhoneCall(String url) async {
   //   if (await canLaunch(url)) {
@@ -63,36 +66,87 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> checkLogin() async {
-    await Firebase.initializeApp().then((value) async {
-      FirebaseAuth.instance.authStateChanges().listen((event) async {
-        if (event != null) {
-          setState(() {
-            uid = event.uid;  //Z0xGaVPKG1TkaQ8cOmmfapauMo42
-            userName = event.displayName;
-            nameLogin = event.displayName;
-            emailLogin = event.email;
-            userEmail = event.email;
-            helper.setStorage('uid', event.uid);
+    String _uid = await helper.getStorage('uid') ?? 'user';
+    // String? _uid = FirebaseAuth.instance.currentUser!.uid;
+    print('####_uid/show_cart.dart>>>$_uid');
 
-          });
-
-          QuerySnapshot qsTypeUser = await FirebaseFirestore.instance
-              .collection('wawastore')
-              .doc('wawastore')
-              .collection('backend')
-              .where('uid', isEqualTo: uid)
-              .get(); //ยัง worked in web***
-
-          String _typeUser = qsTypeUser.docs[0]['typeUser'];
-          setState(() {
-            typeUser = _typeUser;
-          });
-          print('####typeUser>>>$typeUser');
-
-          print('####uid>>${event.uid}');
-        } else {}
+    if (_uid == 'user') {
+      // Navigator.of(context).pushNamed('/authen');
+    } else {
+      setState(() {
+        uid = _uid;
       });
-    });
+            QuerySnapshot qsTypeUser = await FirebaseFirestore.instance
+                .collection('wawastore')
+                .doc('wawastore')
+                .collection('backend')
+                .where('uid', isEqualTo: _uid)
+                .get(); //ยัง worked in web***
+
+            String _typeUser = qsTypeUser.docs[0]['typeUser'];
+                    setState(() {
+                      userName = qsTypeUser.docs[0]['displayName']; //event.displayName;
+                      nameLogin = qsTypeUser.docs[0]['displayName'];
+                      emailLogin = qsTypeUser.docs[0]['email'];//event.email;
+                      userEmail = qsTypeUser.docs[0]['email']; //event.email;
+                      employeeCode = qsTypeUser.docs[0]['employeeCode'];
+                    });
+
+      await FirebaseFirestore.instance
+          .collection('wawastore')
+          .doc('wawastore')
+          .collection('customerCols')
+          .where('code', isEqualTo: qsTypeUser.docs[0]['employeeCode'])
+          .get()
+          .then((value) {
+        if (value.docs.isNotEmpty) {
+          setState(() {
+            priceLevel = value.docs[0]['priceLevel'];
+          });
+        }
+      });
+
+      print('####priceLevel===>>$priceLevel');
+
+            setState(() {
+              typeUser = _typeUser;
+            });
+            print('####typeUser>>>$typeUser');
+
+            // print('####uid>>${event.uid}');
+
+
+    }
+    // await Firebase.initializeApp().then((value) async {
+    //   FirebaseAuth.instance.authStateChanges().listen((event) async {
+    //     if (event != null) {
+    //       setState(() {
+    //         uid = event.uid;  //Z0xGaVPKG1TkaQ8cOmmfapauMo42
+    //         userName = event.displayName;
+    //         nameLogin = event.displayName;
+    //         emailLogin = event.email;
+    //         userEmail = event.email;
+    //         helper.setStorage('uid', event.uid);
+    //
+    //       });
+    //
+    //       QuerySnapshot qsTypeUser = await FirebaseFirestore.instance
+    //           .collection('wawastore')
+    //           .doc('wawastore')
+    //           .collection('backend')
+    //           .where('uid', isEqualTo: uid)
+    //           .get(); //ยัง worked in web***
+    //
+    //       String _typeUser = qsTypeUser.docs[0]['typeUser'];
+    //       setState(() {
+    //         typeUser = _typeUser;
+    //       });
+    //       print('####typeUser>>>$typeUser');
+    //
+    //       print('####uid>>${event.uid}');
+    //     } else {}
+    //   });
+    // });
   }
 
   // Future<Null> getToken() async {
@@ -161,10 +215,11 @@ class _HomePageState extends State<HomePage> {
   Future<void> readCart() async {
     int index = 0;
 
-    String _uid = FirebaseAuth.instance.currentUser!.uid;
+    // String _uid = FirebaseAuth.instance.currentUser!.uid;
+    String? _uid = await helper.getStorage('uid') ;
     print('####_uid>>>$_uid');
 
-    if (_uid.isNotEmpty) {
+    if (_uid != null) {
       await FirebaseFirestore.instance
           .collection('wawastore')
           .doc('wawastore')
@@ -313,7 +368,7 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(
                 width: 4,
               ),
-               AutoSizeText(
+               const AutoSizeText(
                 'WAWA',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32),
                  maxLines: 1,
@@ -339,17 +394,18 @@ class _HomePageState extends State<HomePage> {
           // ),
           GestureDetector(
             onTap: () async {
-              String res = await Navigator.of(context).push(MaterialPageRoute(
+              String? res = await Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) =>
                     SearchXMax(onAdItem: () => readCart()),
               ));
-              if (res == "save") {
+              print('####res/SearchXMax===$res');
+              if (res == null) {
                 readCart();
               }
 
             },
             child: Row(
-              children: [
+              children: const [
                 Icon(
                   Icons.search,
                   size: 32,
@@ -451,7 +507,7 @@ class _HomePageState extends State<HomePage> {
                 })
               : uid != 'user'
                   ? ChatPage()
-                  : Container(), //????
+                  : Container(),
       // : PaymentPage(),
       bottomNavigationBar: BottomNavigationBar(
           backgroundColor: const Color(0xffB7B7B7),
@@ -533,7 +589,7 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
                     Text(
-                      'เวอร์ชั่น Web  1.0.19',
+                      'เวอร์ชั่น Web  1.0.22',
                       style: TextStyle(fontSize: 18),
                     ),
                   ],
@@ -816,7 +872,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> getUid() async {
     String? _uid = await helper.getStorage('uid'); //worked!!**
 
-    if (_uid!.isNotEmpty) {
+    if (_uid != null) {
       setState(() {
         uid = _uid;
       });

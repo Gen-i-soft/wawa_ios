@@ -4,19 +4,20 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:progress_state_button/progress_button.dart';
 import 'package:wawa/authen.dart';
+import 'package:wawa/global.dart';
 import 'package:wawa/models/sqlite_model.dart';
 import 'package:wawa/states/home.dart';
 import 'package:wawa/utility/helper.dart';
 import 'package:wawa/utility/my_style.dart';
 import 'package:wawa/widget/progress_dialog.dart';
 import 'package:http/http.dart' as http;
-
 
 class ShowCart extends StatefulWidget {
   final Function onAdItem;
@@ -47,8 +48,9 @@ class _ShowCartState extends State<ShowCart> {
   int no = 1;
   double total = 0;
   int index2 = 0;
-  String? dateTimeStr, timeStr ;
- String pathAPI = 'http://43.229.149.11:8086/SMLJavaRESTService/restapi/sales/quotation';
+  String? dateTimeStr, timeStr;
+  String pathAPI =
+      'http://43.229.149.11:8086/SMLJavaRESTService/restapi/sales/quotation';
 
   String emName = 'none';
   String emmail = 'none';
@@ -66,15 +68,14 @@ class _ShowCartState extends State<ShowCart> {
   DateTime? dateTime;
   String? _way;
   List<DropdownMenuItem<String>> listDrop = [];
+  List<String> listDropStr = [];
   String hint = 'เลือกพนักงานขาย';
   var myFormat = NumberFormat('##0.0', 'en_US');
 
   Future<void> loadData() async {
-
-
     if (listDrop.isNotEmpty) {
     } else {
-      QuerySnapshot querySale = await dbRef  //ยังดึงข้อมูลได้อยู่นะ web***
+      QuerySnapshot querySale = await dbRef //ยังดึงข้อมูลได้อยู่นะ web***
           .collection('wawastore')
           .doc('wawastore')
           .collection('saleMans')
@@ -84,11 +85,16 @@ class _ShowCartState extends State<ShowCart> {
       if (querySale.docs.isNotEmpty) {
         for (var item in querySale.docs) {
           setState(() {
+            String _listStr = "รหัสพนักงาน:${item['code']} / ชื่อ:${item['saleName']}";
+
+            listDropStr.add(_listStr);
+
             listDrop.add(
               DropdownMenuItem(
                 child: Text(
                   'ชื่อ:${item['saleName']}, รหัสพนักงาน: ${item['code']}',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 value: '${item['code']}',
               ),
@@ -139,16 +145,15 @@ class _ShowCartState extends State<ShowCart> {
                           ),
                           backgroundColor: Colors.black,
                         ),
-
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.clear,
                           size: 32,
                           color: Colors.white,
                         ),
-                        label: Text(
+                        label: const Text(
                           'ยกเลิก',
                           style: TextStyle(
                               fontSize: 20,
@@ -164,32 +169,63 @@ class _ShowCartState extends State<ShowCart> {
                           backgroundColor: Colors.deepOrangeAccent,
                         ),
                         onPressed: () async {
-                          Navigator.pop(context);
+                          Navigator.pop(context); //pop up
+                          // print('####name/delete/inCart>>>${sqLiteModelDelete.name}');
+                          // print('####units/delete/inCart>>>${sqLiteModelDelete.units}');
+                          // print('####uid/delete/inCart>>>${sqLiteModelDelete.uid}');
+
+                          await FirebaseFirestore.instance
+                              .collection('wawastore')
+                              .doc('wawastore')
+                              .collection('inCart')
+                              .where('name', isEqualTo: sqLiteModelDelete.name)
+                              .where('unit',
+                              isEqualTo: sqLiteModelDelete.units)
+                              .where('uid', isEqualTo: sqLiteModelDelete.uid)
+                              .get()
+                              .then((value) async {
+                                if (value.docs.isNotEmpty) {
+                                  for (var item in value.docs){
+                                    print('####item.id>>>${item.id}');
+                                    await FirebaseFirestore.instance
+                                        .collection('wawastore')
+                                        .doc('wawastore')
+                                        .collection('inCart')
+                                        .doc(item.id)
+                                        .delete()
+                                        .then((_) {
+
+                                    });
+
+                                  }
+
+                                }
+
+
+
+                          });
 
                           await FirebaseFirestore.instance
                               .collection('wawastore')
                               .doc('wawastore')
                               .collection('addcart')
-                          .where('name', isEqualTo: sqLiteModelDelete.name)
-                          .where('units', isEqualTo: sqLiteModelDelete.units)
+                              .where('name', isEqualTo: sqLiteModelDelete.name)
+                              .where('units',
+                                  isEqualTo: sqLiteModelDelete.units)
                               .where('uid', isEqualTo: sqLiteModelDelete.uid)
-                          .get().then((value) async {
-
+                              .get()
+                              .then((value) async {
                             await FirebaseFirestore.instance
                                 .collection('wawastore')
                                 .doc('wawastore')
                                 .collection('addcart')
                                 .doc(value.docs[0].id)
-                                .delete().then((value) {
+                                .delete()
+                                .then((_) {
                               readCart();
                               widget.onAdItem();
-
                             });
-
                           });
-
-
-
 
 
 
@@ -200,9 +236,9 @@ class _ShowCartState extends State<ShowCart> {
                           //   // widget.onAdItem();
                           // });
                         },
-                        icon: Icon(Icons.check,
+                        icon: const Icon(Icons.check,
                             size: 32, color: Colors.white),
-                        label: Text(
+                        label: const Text(
                           'ยืนยัน',
                           style: TextStyle(
                               fontSize: 20,
@@ -248,16 +284,15 @@ class _ShowCartState extends State<ShowCart> {
                           ),
                           backgroundColor: Colors.black,
                         ),
-
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.clear,
                           size: 32,
                           color: Colors.white,
                         ),
-                        label: Text(
+                        label: const Text(
                           'ยกเลิก',
                           style: TextStyle(
                               fontSize: 18,
@@ -288,9 +323,9 @@ class _ShowCartState extends State<ShowCart> {
 
                           // }
                         },
-                        icon: Icon(Icons.check,
+                        icon: const Icon(Icons.check,
                             size: 32, color: Colors.white),
-                        label: Text(
+                        label: const Text(
                           'ยืนยัน',
                           style: TextStyle(
                               fontSize: 20,
@@ -306,38 +341,33 @@ class _ShowCartState extends State<ShowCart> {
   }
 
   Future<void> getDataUser() async {
-    // String _uid = await helper.getStorage('uid');
-    String? _uid =  FirebaseAuth.instance.currentUser!.uid;
+    String _uid = await helper.getStorage('uid') ?? 'user';
+    // String? _uid = FirebaseAuth.instance.currentUser!.uid;
     print('####_uid/show_cart.dart>>>$_uid');
 
-    if (_uid.isEmpty) {
+    if (_uid == 'user') {
       Navigator.of(context).pushNamed('/authen');
     } else {
-       await FirebaseFirestore.instance
+      await FirebaseFirestore.instance
           .collection('wawastore')
           .doc('wawastore')
           .collection('backend')
           .where('uid', isEqualTo: _uid)
-          .get().then((value) {
-            if (value.docs.isNotEmpty) {
+          .get()
+          .then((value) {
+        if (value.docs.isNotEmpty) {
+          setState(() {
+            emName = value.docs[0]['displayName'];
+            emmail = value.docs[0]['email'];
+            // emCode = snapshot.docs[0]['employeeCode'];
+            codeSML = value.docs[0]['employeeCode'].toString().toUpperCase();
+            emTel = value.docs[0]['tel'];
+          });
 
-                setState(() {
-                  emName = value.docs[0]['displayName'];
-                  emmail = value.docs[0]['email'];
-                  // emCode = snapshot.docs[0]['employeeCode'];
-                  codeSML = value.docs[0]['employeeCode'].toString().toUpperCase();
-                  emTel = value.docs[0]['tel'];
-                });
+          // print('####emName>>>$emName, emmail>>>$emmail, codeSML>>>$codeSML, emTel>>>$emTel');
 
-                // print('####emName>>>$emName, emmail>>>$emmail, codeSML>>>$codeSML, emTel>>>$emTel');
-
-
-
-
-            }
-       });
-
-
+        }
+      });
     }
   }
 
@@ -384,39 +414,34 @@ class _ShowCartState extends State<ShowCart> {
   //
   // }
 
-
-  checkShowButton() async{
+  checkShowButton() async {
     await FirebaseFirestore.instance
         .collection('wawastore')
         .doc('wawastore')
         .collection('showAndHide')
-    .doc('showAndHide')
-
-        .get().then((value) {
-          if (value.exists) {
-            bool _btnSave = value['showButtonOne'];
-            print('####_btnSave>>>>$_btnSave');
-            setState(() {
-              showBtnSave = _btnSave;
-            });
-
-
-          }
-
+        .doc('showAndHide')
+        .get()
+        .then((value) {
+      if (value.exists) {
+        bool _btnSave = value['showButtonOne'];
+        print('####_btnSave>>>>$_btnSave');
+        setState(() {
+          showBtnSave = _btnSave;
+        });
+      }
     });
-
   }
 
- // Future<void> checkLogin()  async{
- //   String _uid = FirebaseAuth.instance.currentUser!.uid;
- //    if (_uid.isEmpty) {
- //      Navigator.of(context).push(MaterialPageRoute(
- //        builder: (context) => Authen(),
- //      ));
- //      //Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (c)=> Authen()), (route) => false);
- //
- //    }
- //  }
+  // Future<void> checkLogin()  async{
+  //   String _uid = FirebaseAuth.instance.currentUser!.uid;
+  //    if (_uid.isEmpty) {
+  //      Navigator.of(context).push(MaterialPageRoute(
+  //        builder: (context) => Authen(),
+  //      ));
+  //      //Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (c)=> Authen()), (route) => false);
+  //
+  //    }
+  //  }
 
   @override
   void initState() {
@@ -458,13 +483,14 @@ class _ShowCartState extends State<ShowCart> {
           );
         });
 
-    String? _uid =  FirebaseAuth.instance.currentUser!.uid;
+    // String? _uid = FirebaseAuth.instance.currentUser!.uid;
+    String _uid = await helper.getStorage('uid') ?? 'user';
     //await helper.getStorage('uid');
     setState(() {
       // statusLoad = true;
-    //   // sqliteModels.clear();
-    //   // models.clear();
-    //   // total = 0;
+      //   // sqliteModels.clear();
+      //   // models.clear();
+      //   // total = 0;
     });
 
     // QuerySnapshot qsUser = await dbRef
@@ -475,41 +501,41 @@ class _ShowCartState extends State<ShowCart> {
     //     .get();
 
     // if (qsUser.docs.isNotEmpty) {
-      // setState(() {
-      //   emName = qsUser.docs[0]['displayName'];
-      //   emmail = qsUser.docs[0]['email'];
-      //   // emCode = snapshot.docs[0]['employeeCode'];
-      //   codeSML = qsUser.docs[0]['employeeCode'].toString().toUpperCase();
-      //   emTel = qsUser.docs[0]['tel'];
-      // });
+    // setState(() {
+    //   emName = qsUser.docs[0]['displayName'];
+    //   emmail = qsUser.docs[0]['email'];
+    //   // emCode = snapshot.docs[0]['employeeCode'];
+    //   codeSML = qsUser.docs[0]['employeeCode'].toString().toUpperCase();
+    //   emTel = qsUser.docs[0]['tel'];
+    // });
 
-      //
-      // helper.setStorage('emTel', emTel);
+    //
+    // helper.setStorage('emTel', emTel);
     // }
 
     // try {
 
-      //
-      // await SQLiteHelper().readSQLite().then((value) async {
-      //   for (var string in value) {
-      //     // print('string.barcodes>>>${string.barcodes}');
-      //
-      //     String sumString = string.subtotals;
-      //     double sumDouble = double.parse(sumString);
-      //     setState(() {
-      //       total = total + sumDouble;
-      //       sqliteModels.add(string);
-      //       // var _jso = jsonEncode(string.toJsonzz());
-      //       // print('_jso==>>$_jso');
-      //       // models.add(_jso);
-      //       var _jso = (string.toJsonzz());
-      //       modelss.add(string.toJsonzz());
-      //       //add data to modelss list()
-      //
-      //       // models.add(string.toJsonzz().toString());
-      //     });
-      //   } //end >for
-      // });
+    //
+    // await SQLiteHelper().readSQLite().then((value) async {
+    //   for (var string in value) {
+    //     // print('string.barcodes>>>${string.barcodes}');
+    //
+    //     String sumString = string.subtotals;
+    //     double sumDouble = double.parse(sumString);
+    //     setState(() {
+    //       total = total + sumDouble;
+    //       sqliteModels.add(string);
+    //       // var _jso = jsonEncode(string.toJsonzz());
+    //       // print('_jso==>>$_jso');
+    //       // models.add(_jso);
+    //       var _jso = (string.toJsonzz());
+    //       modelss.add(string.toJsonzz());
+    //       //add data to modelss list()
+    //
+    //       // models.add(string.toJsonzz().toString());
+    //     });
+    //   } //end >for
+    // });
     // } catch (e) {
     //   print('error SQlite===>${e.toString()}');
     // }
@@ -525,9 +551,6 @@ class _ShowCartState extends State<ShowCart> {
     // headers['Content-Type'] = 'application/json';
 
     // headers['Access-Control-Allow-Origin'] = "*";
-
-
-
 
     Map<String, dynamic> datas = {};
     DateTime dateTime = DateTime.now();
@@ -568,7 +591,7 @@ class _ShowCartState extends State<ShowCart> {
     } catch (e) {
       print('error==>>${e.toString()}');
     }
-    String docNo = 'WAWA-${dateTime.millisecondsSinceEpoch}';
+    String docNo = 'WAWA-W${dateTime.millisecondsSinceEpoch}';
     // print('docNo>>>$docNo');
 
     // datas['doc_no'] = docNo;
@@ -672,7 +695,6 @@ class _ShowCartState extends State<ShowCart> {
       "sale_type": 0,
       "vat_type": 1,
       "vat_rate": 7,
-
       "total_value": total,
       "total_discount": 0,
       "total_before_vat": total / 1.07,
@@ -723,7 +745,7 @@ class _ShowCartState extends State<ShowCart> {
 
     // Response response = await Dio().post("http://43.229.149.11:8080/SMLJavaRESTService/restapi/sales/quotation",data: formData,options: Options(headers: headers));
     // print('response==>>>$response');
-   //****ปิดไปก่อน ถ้าโอเคที่เหลือค่อย test sml
+    //****ปิดไปก่อน ถ้าโอเคที่เหลือค่อย test sml
     print('####headers:>>> $headers');
     print('####data:>>> ${jsonEncode(body)}');
     Dio dio = Dio();
@@ -744,7 +766,8 @@ class _ShowCartState extends State<ShowCart> {
     //   print('####e.toString() in erron in process Dio http://43.229.149.11:8080/xxx >>>${e.toString()}');
     // }
     var url = Uri.parse(pathAPI);
-    var response = await http.post(url,headers: headers, body: jsonEncode(body));
+    var response =
+        await http.post(url, headers: headers, body: jsonEncode(body));
     print('####Response status: ${response.statusCode}');
     // print('####Response body: ${response.body}');
 
@@ -756,9 +779,10 @@ class _ShowCartState extends State<ShowCart> {
 
     // await Firebase.initializeApp().then((value) async {
     try {
-      // String uid = await helper.getStorage('uid');
+      String? uid = await helper.getStorage('uid');
       //getDataUser();
-      String uid =  FirebaseAuth.instance.currentUser!.uid;
+      // String uid = FirebaseAuth.instance.currentUser!.uid;  // หายทุกครั้งที่เข้ามาใหม่
+
 
       await FirebaseFirestore.instance
           .collection('wawastore')
@@ -766,6 +790,7 @@ class _ShowCartState extends State<ShowCart> {
           .collection('Report')
           .add({
         "uid": uid,
+        "priceLevel" : priceLevel,
         // "way": _way,
         "totalValue": total,
         //
@@ -876,190 +901,191 @@ class _ShowCartState extends State<ShowCart> {
   }
 
   Future<void> saveToPdf(String docNo, String dateTimeStr, double total) async {
+    // await SQLiteHelper().readSQLite().then((value) async {
+    String _uid = await helper.getStorage('uid');
+    // String _uId = await helper.getStorage('uid');
+    // String _uId = FirebaseAuth.instance.currentUser!.uid;
+    // String _uid = FirebaseAuth.instance.currentUser!.uid;
+    // print('####_uId>>>>$_uId');
+    int _index = 0;
 
-      // await SQLiteHelper().readSQLite().then((value) async {
-        // String _uid = await helper.getStorage('uid');
-        // String _uId = await helper.getStorage('uid');
-    String _uId = FirebaseAuth.instance.currentUser!.uid;
-        String _uid = FirebaseAuth.instance.currentUser!.uid;
-        // print('####_uId>>>>$_uId');
-        int _index = 0;
-
+    await FirebaseFirestore.instance
+        .collection('wawastore')
+        .doc('wawastore')
+        .collection('addcart')
+        .where('uid', isEqualTo: _uid)
+        .get()
+        .then((value) async {
+      for (var item in value.docs) {
+        // final imgBase64Str = await networkImageToBase64(item.picturl);
+        // print('imgBase64Str>>>$_index.$imgBase64Str'); //work jaa
         await FirebaseFirestore.instance
             .collection('wawastore')
             .doc('wawastore')
-            .collection('addcart')
-            .where('uid', isEqualTo: _uid)
+            .collection('product2')
+            .doc(item['code'])
+            .collection('unit_codes')
+            .doc(item['units'])
             .get()
             .then((value) async {
-          for (var item in value.docs) {
-            // final imgBase64Str = await networkImageToBase64(item.picturl);
-            // print('imgBase64Str>>>$_index.$imgBase64Str'); //work jaa
-            await FirebaseFirestore.instance
-                .collection('wawastore')
-                .doc('wawastore')
-                .collection('product2')
-                .doc(item['code'])
-                .collection('unit_codes')
-                .doc(item['units'])
-                .get().then((value) async {
-              if (value.exists) {
-                num _price0 = value['price0'];
+          if (value.exists) {
+            num _price0 =
+            //value['price0'];
+            priceLevel == 0  ?  value['price0'] :
+            priceLevel == 1  ?  value['price1'] :
+            priceLevel == 2  ?  value['price2'] :
+            priceLevel == 3  ?  value['price3'] :
+            priceLevel == 4  ?  value['price4'] :
+            priceLevel == 5  ?  value['price5'] :
+            priceLevel == 6  ?  value['price6'] :
+            priceLevel == 7  ?  value['price7'] :
+            priceLevel == 8  ?  value['price8'] :
+            priceLevel == 9  ?  value['price9'] :
+            value['price0'];
 
-                //have data
-                // String sumString = string.subtotals;
-                // double sumDouble = double.parse(sumString);
-                num sumDouble = item['amounts'] * _price0;
-                String _subtotals = myFormat.format(sumDouble);
+            //have data
+            // String sumString = string.subtotals;
+            // double sumDouble = double.parse(sumString);
+            num sumDouble = item['amounts'] * _price0;
+            String _subtotals = myFormat.format(sumDouble);
 
+            // setState(() {
+            //   total = total + sumDouble;
+            // });
 
-                // setState(() {
-                //   total = total + sumDouble;
+            try {
+              await dbRef
+                  .collection('wawastore')
+                  .doc('wawastore')
+                  .collection('purchase')
+                  .add({
+                "docNo": docNo,
+                "priceLevel" : priceLevel,
+                "dateTimeStr": dateTimeStr,
+                "total": total, //global ไม่บวกเพิ่ม
+                "code": item['code'],
+                "price": _price0.toString(), //item['prices'],
+                "name": item['name'],
+                // "bacode": item.barcodes,
+                "unit": item['units'],
+                "amounts": item['amounts'],
+                "subtotal": _subtotals, //item['subtotals'],
+                "picturl": item['picturl'],
+                // "strpict": imgBase64Str,
+                "time": DateTime.now().millisecondsSinceEpoch,
+                "uid": _uid,
+                "codeSale": codeSale,
+                "nameSale": hint
+              });
+
+              //purchase-dashboard
+
+              QuerySnapshot qsDasboard = await dbRef //worked***
+                  .collection('wawastore')
+                  .doc('wawastore')
+                  .collection('purchase-dashboard')
+                  .where('uId', isEqualTo: _uid)
+                  .where('docNo', isEqualTo: docNo)
+                  .get();
+
+              if (qsDasboard.docs.isEmpty) {
+                //create
+                await dbRef
+                    .collection('wawastore')
+                    .doc('wawastore')
+                    .collection('purchase-dashboard')
+                    .add({
+                  "status": 'ยืนยันคำสั่งซื้อ',
+                  "docNo": docNo,
+                  "dateTimeStr": dateTimeStr,
+                  "total": total, //global
+                  "priceLevel" : priceLevel,
+                  "uId": _uid,
+                  "time": DateTime.now().millisecondsSinceEpoch,
+                });
+              } else {
+                //update
+                // await dbRef
+                //     .collection('wawastore')
+                //     .doc('wawastore')
+                //     .collection('purchase-dashboard')
+                //     .doc(qsDasboard.docs[0].id)
+                //     .update({
+                //   "time": new DateTime.now().millisecondsSinceEpoch,
                 // });
-
-
-                try {
-                  await dbRef
-                      .collection('wawastore')
-                      .doc('wawastore')
-                      .collection('purchase')
-                      .add({
-                    "docNo": docNo,
-                    "dateTimeStr": dateTimeStr,
-                    "total": total,//global ไม่บวกเพิ่ม
-                    "code": item['code'],
-                    "price": _price0.toString(), //item['prices'],
-                    "name": item['name'],
-                    // "bacode": item.barcodes,
-                    "unit": item['units'],
-                    "amounts": item['amounts'],
-                    "subtotal": _subtotals, //item['subtotals'],
-                    "picturl": item['picturl'],
-                    // "strpict": imgBase64Str,
-                    "time": DateTime
-                        .now()
-                        .millisecondsSinceEpoch,
-                    "uid": _uId,
-                    "codeSale": codeSale,
-                    "nameSale": hint
-                  });
-
-                  //purchase-dashboard
-
-                  QuerySnapshot qsDasboard = await dbRef //worked***
-                      .collection('wawastore')
-                      .doc('wawastore')
-                      .collection('purchase-dashboard')
-                      .where('uId', isEqualTo: _uId)
-                      .where('docNo', isEqualTo: docNo)
-                      .get();
-
-                  if (qsDasboard.docs.isEmpty) {
-                    //create
-                    await dbRef
-                        .collection('wawastore')
-                        .doc('wawastore')
-                        .collection('purchase-dashboard')
-                        .add({
-                      "status": 'ยืนยันคำสั่งซื้อ',
-                      "docNo": docNo,
-                      "dateTimeStr": dateTimeStr,
-                      "total": total,//global
-                      "uId": _uId,
-                      "time": DateTime
-                          .now()
-                          .millisecondsSinceEpoch,
-                    });
-                  } else {
-                    //update
-                    // await dbRef
-                    //     .collection('wawastore')
-                    //     .doc('wawastore')
-                    //     .collection('purchase-dashboard')
-                    //     .doc(qsDasboard.docs[0].id)
-                    //     .update({
-                    //   "time": new DateTime.now().millisecondsSinceEpoch,
-                    // });
-                  }
-                } catch (e) {
-                  print('error>>${e.toString()}');
-                }
               }
-            });
-            _index++;
+            } catch (e) {
+              print('error>>${e.toString()}');
+            }
           }
+        });
+        _index++;
+      }
       //  });
 
-          // String url =
-          //     // 'http://103.129.14.235/wawastore/addOrder.php?isAdd=true&docno="aa"&doctime="bb"&totals=300.00&codes=${item.code}&names=${item.name}&prices="aa"&units=${item.units}&amounts=1&subtotals="bb"&picturl=${item.picturl}&uid=$uid';
-          //     'http://103.129.14.235/wawastore/addOrder.php?isAdd=true&docno=$docNo&docdate=$dateTimeStr&totals=$total&codes=${item.code}&names=${item.name}&prices=${item.prices}&units=${item.units}&amounts=${item.amounts}&subtotals=${item.subtotals}&picturl="image"&uid=$uid';
-          // try {
-          //   Response response = await Dio().get(url);
-          //   print('res>>$response');
-          // } catch (e) {
-          //   print('error>> ${e.toString()}');
-          // }
-          // print('url>>>$url');
+      // String url =
+      //     // 'http://103.129.14.235/wawastore/addOrder.php?isAdd=true&docno="aa"&doctime="bb"&totals=300.00&codes=${item.code}&names=${item.name}&prices="aa"&units=${item.units}&amounts=1&subtotals="bb"&picturl=${item.picturl}&uid=$uid';
+      //     'http://103.129.14.235/wawastore/addOrder.php?isAdd=true&docno=$docNo&docdate=$dateTimeStr&totals=$total&codes=${item.code}&names=${item.name}&prices=${item.prices}&units=${item.units}&amounts=${item.amounts}&subtotals=${item.subtotals}&picturl="image"&uid=$uid';
+      // try {
+      //   Response response = await Dio().get(url);
+      //   print('res>>$response');
+      // } catch (e) {
+      //   print('error>> ${e.toString()}');
+      // }
+      // print('url>>>$url');
 
-       // } //end >for
-      }).then((_) async {
-
+      // } //end >for
+    }).then((_) async {
 //delete addcart
+      await FirebaseFirestore.instance
+          .collection('wawastore')
+          .doc('wawastore')
+          .collection('addcart')
+          .where('uid', isEqualTo: _uid)
+          .get()
+          .then((valueDel) async {
+        for (var item in valueDel.docs) {
+          await FirebaseFirestore.instance
+              .collection('wawastore')
+              .doc('wawastore')
+              .collection('addcart')
+              .doc(item.id)
+              .delete();
+        }
+
+        //delete all inCart
+
+        // String _uId = await helper.getStorage('uid');
         await FirebaseFirestore.instance
             .collection('wawastore')
             .doc('wawastore')
-            .collection('addcart')
-            .where('uid', isEqualTo: _uId)
+            .collection('inCart')
+            .where('uid', isEqualTo: _uid)
             .get()
-            .then((valueDel) async {
-              for(var item in valueDel.docs){
-                await FirebaseFirestore.instance
-                    .collection('wawastore')
-                    .doc('wawastore')
-                    .collection('addcart')
-                    .doc(item.id)
-                    .delete();
-
-
-              }
-
-              //delete inCart
-              String _uId = await helper.getStorage('uid');
-              await FirebaseFirestore.instance
-                  .collection('wawastore')
-                  .doc('wawastore')
-                  .collection('inCart')
-                  .where('uid',isEqualTo: _uId)
-                  .get().then((valueInCart) async {
-                for (var item in valueInCart.docs){
-                  print('####item.id>>>${item.id}');
-                  FirebaseFirestore.instance
-                      .collection('wawastore')
-                      .doc('wawastore')
-                      .collection('inCart')
-                      .doc(item.id)
-                      .delete();
-
-                }
-
-              });
-        }).then((_) {
-                Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (context) => HomePage(
-                        onAdItem: () {
-                          widget.onAdItem();
-                        },
-                      ),
-                    ),
-                    (route) => false);
-
-
-       });
-
-
+            .then((valueInCart) async {
+          for (var item in valueInCart.docs) {
+            print('####item.id>>>${item.id}');
+            FirebaseFirestore.instance
+                .collection('wawastore')
+                .doc('wawastore')
+                .collection('inCart')
+                .doc(item.id)
+                .delete();
+          }
         });
-        //
+      }).then((_) {
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => HomePage(
+                onAdItem: () {
+                  widget.onAdItem();
+                },
+              ),
+            ),
+            (route) => false);
+      });
+    });
+    //
     //     await SQLiteHelper().deleteAllData().then((value) {
     //       // readCart();
     //       // Navigator.of(context).pop(true);
@@ -1084,7 +1110,8 @@ class _ShowCartState extends State<ShowCart> {
     //     total = 0;
     //   });
     // }
-    String _uid = FirebaseAuth.instance.currentUser!.uid;
+    // String _uid = FirebaseAuth.instance.currentUser!.uid;
+    String _uid = await helper.getStorage('uid') ?? 'user';
     setState(() {
       sqliteModels.clear();
       delID.clear();
@@ -1107,7 +1134,6 @@ class _ShowCartState extends State<ShowCart> {
       //new trick var > then copy
       if (value.docs.isNotEmpty) {
         for (var item in value.docs) {
-
           await FirebaseFirestore.instance
               .collection('wawastore')
               .doc('wawastore')
@@ -1115,9 +1141,21 @@ class _ShowCartState extends State<ShowCart> {
               .doc(item['code'])
               .collection('unit_codes')
               .doc(item['units'])
-              .get().then((value) {
+              .get()
+              .then((value) {
             if (value.exists) {
-              num _price0 = value['price0'];
+              num _price0 = //value['price0'];
+              priceLevel == 0  ?  value['price0'] :
+              priceLevel == 1  ?  value['price1'] :
+              priceLevel == 2  ?  value['price2'] :
+              priceLevel == 3  ?  value['price3'] :
+              priceLevel == 4  ?  value['price4'] :
+              priceLevel == 5  ?  value['price5'] :
+              priceLevel == 6  ?  value['price6'] :
+              priceLevel == 7  ?  value['price7'] :
+              priceLevel == 8  ?  value['price8'] :
+              priceLevel == 9  ?  value['price9'] :
+              value['price0'];
 
               //have data
               // String sumString = string.subtotals;
@@ -1130,20 +1168,15 @@ class _ShowCartState extends State<ShowCart> {
               });
               // sqliteModels.add(string); //this***
 
-
-
               SQLiteModel model = SQLiteModel.fromMap({
-
-                "code" : item['code'],
-                "name" : item['name'],
-                "prices" : _price0.toString(),
-                "units" : item['units'],
-                "amounts" : item['amounts'],
-                "subtotals" : _subtotals,
-                "picturl" : item['picturl'],
-                "uid" : item['uid'],
-
-
+                "code": item['code'],
+                "name": item['name'],
+                "prices": _price0.toString(),
+                "units": item['units'],
+                "amounts": item['amounts'],
+                "subtotals": _subtotals,
+                "picturl": item['picturl'],
+                "uid": item['uid'],
               });
               setState(() {
                 sqliteModels.add(model);
@@ -1160,16 +1193,10 @@ class _ShowCartState extends State<ShowCart> {
               // models.add(string.toJsonzz().toString());
               // });
 
-
             }
           });
 
-
-
           //<<<new0
-
-
-
 
           // String sumString =
           //     item['subtotals']; //***ถ้าปรับ string to num จะเสียเวลาจ้า
@@ -1313,7 +1340,7 @@ class _ShowCartState extends State<ShowCart> {
                     : const Icon(Icons.check_box_outline_blank),
                 title: const Text('ลูกค้าสะดวกรับสินค้าเองที่ร้าน',
                     style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
                 onTap: () {
                   setState(() {
                     nodelivery = !nodelivery;
@@ -1335,7 +1362,7 @@ class _ShowCartState extends State<ShowCart> {
                     : const Icon(Icons.check_box_outline_blank),
                 title: const Text('ต้องการให้ทางร้านไปส่งสินค้า',
                     style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
                 onTap: () {
                   setState(() {
                     delivery = !delivery;
@@ -1360,54 +1387,59 @@ class _ShowCartState extends State<ShowCart> {
               Column(
                 children: [
                   Text('ร้าน: $emName',
-                      style:
-                          const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 30)),
                   Text('อีเมล์: $emmail',
-                      style:
-                          const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 30)),
                   Text('SML code: $codeSML',
-                      style:
-                          const TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 30))
                 ],
               ),
               const SizedBox(
                 height: 30,
               ),
 
-           showBtnSave ?   btnSave
-                  ? buildCloudButton()
-                  : ProgressButton(
-                      stateWidgets: const {
-                        ButtonState.loading: Text(
-                          "ระบบกำลังบันทึกข้อมูล...",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        ButtonState.fail: Text(
-                          "ระบบกำลังบันทึกข้อมูล...",
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.w500),
-                        ),
-                        ButtonState.idle: Text(
-                          "ระบบกำลังบันทึกข้อมูล กรุณารอสักครู่...",
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.w500),
-                        ),
-                        ButtonState.success: Text(
-                          "ระบบกำลังบันทึกข้อมูล...",
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.w500),
+              showBtnSave
+                  ? btnSave
+                      ? buildCloudButton()
+                      : ProgressButton(
+                          stateWidgets: const {
+                            ButtonState.loading: Text(
+                              "ระบบกำลังบันทึกข้อมูล...",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            ButtonState.fail: Text(
+                              "ระบบกำลังบันทึกข้อมูล...",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                            ButtonState.idle: Text(
+                              "ระบบกำลังบันทึกข้อมูล กรุณารอสักครู่...",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                            ButtonState.success: Text(
+                              "ระบบกำลังบันทึกข้อมูล...",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500),
+                            )
+                          },
+                          stateColors: {
+                            ButtonState.loading: Colors.blue.shade300,
+                            ButtonState.fail: Colors.red.shade300,
+                            ButtonState.idle: Colors.grey.shade400,
+                            ButtonState.success: Colors.green.shade400,
+                          },
                         )
-                      },
-                      stateColors: {
-                        ButtonState.loading: Colors.blue.shade300,
-                        ButtonState.fail: Colors.red.shade300,
-                        ButtonState.idle: Colors.grey.shade400,
-                        ButtonState.success: Colors.green.shade400,
-                      },
-                    ): Container(),
+                  : Container(),
 
               const SizedBox(
                 height: 50,
@@ -1475,7 +1507,7 @@ class _ShowCartState extends State<ShowCart> {
   //   );
   // }
 
-  Row buildCloudButton() {
+  Widget buildCloudButton() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -1484,13 +1516,12 @@ class _ShowCartState extends State<ShowCart> {
             // height: 60,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(10)
-                // topLeft: Radius.circular(20),
-                // bottomLeft: Radius.circular(20),
-              ),
+                  // topLeft: Radius.circular(20),
+                  // bottomLeft: Radius.circular(20),
+                  ),
             ),
             backgroundColor: Colors.red[600],
           ),
-
           onPressed: () {
             confirmOrder();
           },
@@ -1589,7 +1620,7 @@ class _ShowCartState extends State<ShowCart> {
     );
   }
 
-  Row buildRowTotal() {
+  Widget buildRowTotal() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -1633,7 +1664,7 @@ class _ShowCartState extends State<ShowCart> {
               padding: EdgeInsets.all(8.0),
               child: Text(
                 'เลือกวันที่รับสินค้า',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               ),
             )
           ],
@@ -1650,7 +1681,7 @@ class _ShowCartState extends State<ShowCart> {
             controller: ctrlDatetime,
             style: TextStyle(
                 color: MyStyle().darkColor,
-                fontSize: 22,
+                fontSize: 30,
                 fontWeight: FontWeight.bold),
           ),
           // Text(
@@ -1666,7 +1697,7 @@ class _ShowCartState extends State<ShowCart> {
     );
   }
 
-  ListView buildListView() {
+  Widget buildListView() {
     return ListView.builder(
       shrinkWrap: true,
       physics: const ScrollPhysics(),
@@ -1681,25 +1712,25 @@ class _ShowCartState extends State<ShowCart> {
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   '${index + 1}. ${sqliteModels[index].name}',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 30),
                 ),
               ),
               IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () async {
-
                     // print('####you delete id= ${delID[index]}');
-                   
-                    confirmDelete(sqliteModels[index] );
-                    // 
+
+                    confirmDelete(sqliteModels[index]);
+                    //
                   })
             ],
           ),
           Row(
             children: [
               SizedBox(
-                width: 100,
-                height: 100,
+                width: 200,
+                height: 200,
                 child: CachedNetworkImage(
                   imageUrl: sqliteModels[index].picturl,
                   errorWidget: (context, url, error) =>
@@ -1719,19 +1750,19 @@ class _ShowCartState extends State<ShowCart> {
                         const Text(
                           'ราคา:',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 22),
+                              fontWeight: FontWeight.bold, fontSize: 30),
                         ),
                         Text(
                           MyStyle()
                               .myFormat
                               .format(double.parse(sqliteModels[index].prices)),
                           style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 22),
+                              fontWeight: FontWeight.bold, fontSize: 30),
                         ),
                         const Text(
                           ' บาท',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 22),
+                              fontWeight: FontWeight.bold, fontSize: 30),
                         ),
                       ],
                     ),
@@ -1741,12 +1772,12 @@ class _ShowCartState extends State<ShowCart> {
                         const Text(
                           'จำนวน:',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 22),
+                              fontWeight: FontWeight.bold, fontSize: 30),
                         ),
                         Text(
                             '${sqliteModels[index].amounts} x ${sqliteModels[index].units}',
                             style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 22)),
+                                fontWeight: FontWeight.bold, fontSize: 30)),
                       ],
                     ),
 
@@ -1755,7 +1786,7 @@ class _ShowCartState extends State<ShowCart> {
                         const Text(
                           'ราคารวม:',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 24),
+                              fontWeight: FontWeight.bold, fontSize: 30),
                         ),
                         Text(
                           MyStyle().myFormat.format(
@@ -1768,7 +1799,7 @@ class _ShowCartState extends State<ShowCart> {
                         const Text(
                           ' บาท',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 24),
+                              fontWeight: FontWeight.bold, fontSize: 30),
                         ),
                       ],
                     ),
@@ -1813,7 +1844,7 @@ class _ShowCartState extends State<ShowCart> {
     }
   }
 
-  Column buildSelectSaleName() {
+  Widget buildSelectSaleName() {
     return Column(
       children: [
         Row(
@@ -1822,7 +1853,7 @@ class _ShowCartState extends State<ShowCart> {
               padding: EdgeInsets.all(8.0),
               child: Text(
                 'รหัสพนักงานขาย',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               ),
             )
           ],
@@ -1831,26 +1862,75 @@ class _ShowCartState extends State<ShowCart> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(
-              width: MediaQuery.of(context).size.width*0.4,
+              width: MediaQuery.of(context).size.width * 0.4,
               height: 65.0,
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
-                child: DropdownButton(
-                  hint: Text(
-                    hint,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                child:  SizedBox(
+                  width: MediaQuery.of(context).size.width*0.6,
+                  child: DropdownSearch<String>(
+                    mode: Mode.MENU,
+                    showSelectedItems: true,
+                    items:listDropStr,
+                    // listDrop,
+                    dropdownSearchDecoration: const InputDecoration(
+                      // labelText: "เลือกอำเภอ",
+                      hintText: "เลือกพนักงานขาย",
+                    ),
+                    popupItemDisabled: (String s) => s.startsWith('I'),
+                    onChanged: (String? v){
+                      print('####v===$v');
+                      List<String> salemanList = v!.split('/');
+                      List<String> codeList = salemanList[0].split(':');
+                      List<String> nameList = salemanList[1].split(':');
+
+
+                      print('####codeSale>>>${codeList[1]}');
+                      print('####hint>>>${nameList[1]}');
+                      setState(() {
+                        // amphurName = v;
+                        // showDistrict = false;
+                        // listDistrictName.clear();
+                        codeSale = codeList[1];
+                        hint = nameList[1];
+
+
+                      });
+                      // var noo = listAmphurs.indexOf(v!);//**เคยทำได้จำได้ลางๆๆ
+                      // setState(() {
+                      //   amphurID = listAmphurIds[noo];
+                      //   //showDistrict = true;
+                      // });
+
+                      // getDistrict();
+
+
+
+
+                      // print('####ampherID=$ampherID');//**worked จ้า
+
+                      // print('####hosname=$hosname, v= $v');
+                    },
+                    selectedItem: "",
                   ),
-                  items: listDrop,
-                  onChanged: (value) {
-                    codeSale = value.toString();
-
-                    setState(() {
-                      hint = value.toString();
-                    });
-
-                    // print('codeSale>>>$codeSale');
-                  },
                 ),
+                // DropdownButton(
+                //   hint: Text(
+                //     hint,
+                //     style: const TextStyle(
+                //         fontSize: 20, fontWeight: FontWeight.bold),
+                //   ),
+                //   items: listDrop,
+                //   onChanged: (value) {
+                //     codeSale = value.toString();
+                //
+                //     setState(() {
+                //       hint = value.toString();
+                //     });
+                //
+                //     // print('codeSale>>>$codeSale');
+                //   },
+                // ),
               ),
             ),
             // IconButton(

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'package:flutter/material.dart';
+import 'package:wawa/global.dart';
 
 //import 'package:wawa/states/syn_data_to_firebase.dart';
 //import 'package:wawa/states/home.dart';
@@ -17,6 +18,8 @@ import 'utility/dialog.dart';
 //import 'utility/sqlite_helper.dart';
 
 class Authen extends StatefulWidget {
+  const Authen({Key? key}) : super(key: key);
+
   @override
   _AuthenState createState() => _AuthenState();
 }
@@ -30,7 +33,7 @@ class _AuthenState extends State<Authen> {
   bool statusRedEye = true;
   Map<String, dynamic>? datas;
 
-  Helper helper = new Helper();
+  Helper helper = Helper();
 
   void showToast(String msg) {
     // Toast.show(msg, context,
@@ -70,7 +73,7 @@ class _AuthenState extends State<Authen> {
       // resizeToAvoidBottomInset: false,
       // floatingActionButton: buildCreateAccount(),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -144,25 +147,25 @@ class _AuthenState extends State<Authen> {
   Container buildUser() {
     return Container(
       decoration: MyStyle().boxDecoration(),
-      margin: EdgeInsets.only(top: 16),
+      margin: const EdgeInsets.only(top: 16),
       width: screen * 0.5,
       child: TextField(
         keyboardType: TextInputType.emailAddress,
         onChanged: (value) => user = value.trim(),
-        style: TextStyle(color: Colors.black, fontSize: 28),
+        style: const TextStyle(color: Colors.black, fontSize: 28),
         decoration: InputDecoration(
-          hintStyle: TextStyle(color: Colors.black38),
+          hintStyle: const TextStyle(color: Colors.black38),
           hintText: 'อีเมล์ :',
-          prefixIcon: Icon(
+          prefixIcon: const Icon(
             Icons.email,
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide(color: Colors.black),
+            borderSide: const BorderSide(color: Colors.black),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide(color: Colors.black45),
+            borderSide: const BorderSide(color: Colors.black45),
           ),
         ),
       ),
@@ -173,17 +176,17 @@ class _AuthenState extends State<Authen> {
     return Container(
       // color: Colors.white,
       decoration: MyStyle().boxDecoration(),
-      margin: EdgeInsets.only(top: 16),
+      margin: const EdgeInsets.only(top: 16),
       width: screen * 0.5,
       child: TextField(
         keyboardType: TextInputType.emailAddress,
         obscureText: statusRedEye,
         onChanged: (value) => password = value.trim(),
-        style: TextStyle(color: Colors.black, fontSize: 28),
+        style: const TextStyle(color: Colors.black, fontSize: 28),
         decoration: InputDecoration(
-          hintStyle: TextStyle(color: Colors.black38),
+          hintStyle: const TextStyle(color: Colors.black38),
           hintText: 'รหัสผ่าน :',
-          prefixIcon: Icon(
+          prefixIcon: const Icon(
             Icons.vpn_key,
           ),
           suffixIcon: IconButton(
@@ -197,11 +200,11 @@ class _AuthenState extends State<Authen> {
               }),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide(color: Colors.black),
+            borderSide: const BorderSide(color: Colors.black),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide(color: Colors.black45),
+            borderSide: const BorderSide(color: Colors.black45),
           ),
         ),
       ),
@@ -293,11 +296,11 @@ class _AuthenState extends State<Authen> {
   Widget buildLogin() {
     return Container(
       height: 60,
-      margin: EdgeInsets.only(top: 16),
+      margin: const EdgeInsets.only(top: 16),
       width: screen * 0.5,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          primary: Color(0xffA97474),
+          backgroundColor: const Color(0xffA97474),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         ),
@@ -325,7 +328,7 @@ class _AuthenState extends State<Authen> {
             //
           }
         },
-        child: Text(
+        child: const Text(
           'ลงชื่อเข้าใช้งาน',
           style: TextStyle(
               fontSize: 28, color: Colors.white, fontWeight: FontWeight.bold),
@@ -339,12 +342,15 @@ class _AuthenState extends State<Authen> {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: user!, password: password!)
           .then((value2) async {
-        Navigator.of(context).pop("success");
+
         //print('################################value2==>${value2.user.uid}');
         helper.setStorage('uid', value2.user!.uid);
+        setState(() {
+          uid = value2.user!.uid;
+        });
 
-        String token = await helper.getStorage('token');
-        if (token != null) {
+        String? token = await helper.getStorage('token'); //**1/2
+        if (token != null) {  //**2/2
           QuerySnapshot qsDashboard = await dbRef
               .collection('wawastore')
               .doc('wawastore')
@@ -352,7 +358,7 @@ class _AuthenState extends State<Authen> {
               .where('uid', isEqualTo: value2.user!.uid)
               .get();
 
-          if (qsDashboard.docs.length > 0) {
+          if (qsDashboard.docs.isNotEmpty) {
             await dbRef
                 .collection('wawastore')
                 .doc('wawastore')
@@ -361,6 +367,8 @@ class _AuthenState extends State<Authen> {
                 .update({"token": token});
           }
         }
+
+        Navigator.of(context).pop("success");
 
         // Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       }).catchError((value3) {

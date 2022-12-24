@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:wawa/global.dart';
 import 'package:wawa/models/barcode_model.dart';
 import 'package:wawa/models/product_cloud_model.dart';
 import 'package:wawa/states/choose_product.dart';
@@ -36,7 +37,7 @@ class _ChooseProductNumberState extends State<ChooseProductNumber> {
   String? doct;
   List<BarcodeModel> barcodeModels = [];
   double screen =0;
-  String uid = 'user';
+  // String uid = 'user';
   TextEditingController amountController = TextEditingController();
   Helper helper = Helper();
 
@@ -62,7 +63,11 @@ class _ChooseProductNumberState extends State<ChooseProductNumber> {
   }
 
   Future<void> readProduct() async {
-    barcodeModels.clear();
+    setState(() {
+      barcodeModels.clear();
+      amounts.clear();
+      subTotals.clear();
+    });
     await Firebase.initializeApp().then((value) async {
       await dbRef
           .collection('wawastore')
@@ -449,8 +454,49 @@ class _ChooseProductNumberState extends State<ChooseProductNumber> {
             ),
             Expanded(
               flex: 2,
-              child: Text(
-                MyStyle().myFormat.format(barcodeModels[index].price0),
+              child:
+               Text(
+              //   MyStyle().myFormat.format(barcodeModels[index].price0),
+                 priceLevel == 0
+                     ? MyStyle().myFormat.format(barcodeModels[index].price0)
+                     : priceLevel == 1
+                     ? MyStyle().myFormat.format(barcodeModels[index].price1)
+                     : priceLevel == 2
+                     ? MyStyle()
+                     .myFormat
+                     .format(barcodeModels[index].price2)
+                     : priceLevel == 3
+                     ? MyStyle()
+                     .myFormat
+                     .format(barcodeModels[index].price3)
+                     : priceLevel == 4
+                     ? MyStyle()
+                     .myFormat
+                     .format(barcodeModels[index].price4)
+                     : priceLevel == 5
+                     ? MyStyle()
+                     .myFormat
+                     .format(barcodeModels[index].price5)
+                     : priceLevel == 6
+                     ? MyStyle().myFormat.format(
+                     barcodeModels[index].price6)
+                     : priceLevel == 7
+                     ? MyStyle().myFormat.format(
+                     barcodeModels[index].price7)
+                     : priceLevel == 8
+                     ? MyStyle().myFormat.format(
+                     barcodeModels[index]
+                         .price8)
+                     : priceLevel == 9
+                     ? MyStyle().myFormat.format(
+                     barcodeModels[index]
+                         .price9)
+                     : MyStyle()
+                     .myFormat
+                     .format(
+                     barcodeModels[
+                     index]
+                         .price0),
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -480,8 +526,52 @@ class _ChooseProductNumberState extends State<ChooseProductNumber> {
                           //  if (amounts[index] != 0) {
                           setState(() {
                             // amounts[index]--;
-                            subTotals[index] = barcodeModels[index].price0 *
-                                double.parse(amounts[index].toString());
+                            subTotals[index] =
+                                // barcodeModels[index].price0 *
+                                // double.parse(amounts[index].toString());
+                            priceLevel == 0
+                                ? barcodeModels[index].price0 *
+                                double.parse(amounts[index].toString())
+                                : priceLevel == 1
+                                ? barcodeModels[index].price1 *
+                                double.parse(amounts[index].toString())
+                                : priceLevel == 2
+                                ? barcodeModels[index].price2 *
+                                double.parse(
+                                    amounts[index].toString())
+                                : priceLevel == 3
+                                ? barcodeModels[index].price3 *
+                                double.parse(
+                                    amounts[index].toString())
+                                : priceLevel == 4
+                                ? barcodeModels[index].price4 *
+                                double.parse(amounts[index]
+                                    .toString())
+                                : priceLevel == 5
+                                ? barcodeModels[index].price5 *
+                                double.parse(
+                                    amounts[index]
+                                        .toString())
+                                : priceLevel == 6
+                                ? barcodeModels[index]
+                                .price6 *
+                                double.parse(
+                                    amounts[index]
+                                        .toString())
+                                : priceLevel == 7
+                                ? barcodeModels[index]
+                                .price7 *
+                                double.parse(
+                                    amounts[index]
+                                        .toString())
+                                : priceLevel == 8
+                                ? barcodeModels[index]
+                                .price8 *
+                                double.parse(
+                                    amounts[index].toString())
+                                : priceLevel == 9
+                                ? barcodeModels[index].price9 * double.parse(amounts[index].toString())
+                                : barcodeModels[index].price0 * double.parse(amounts[index].toString());
                             total = 0;
                             for (var item in subTotals) {
                               total = total + item;
@@ -585,10 +675,39 @@ class _ChooseProductNumberState extends State<ChooseProductNumber> {
       String name = products!['name'];
 
       //String barcodes = barcodeModels[index].barcode;
-      String prices = barcodeModels[index].price0.toString();
+      String prices =
+      //barcodeModels[index].price0.toString();
+      priceLevel == 0
+          ? barcodeModels[index].price0.toString()
+          : priceLevel == 1
+          ? barcodeModels[index].price1.toString()
+          : priceLevel == 2
+          ? barcodeModels[index].price2.toString()
+          : priceLevel == 3
+          ? barcodeModels[index].price3.toString()
+          : priceLevel == 4
+          ? barcodeModels[index].price4.toString()
+          : priceLevel == 5
+          ? barcodeModels[index].price5.toString()
+          : priceLevel == 6
+          ? barcodeModels[index].price6.toString()
+          : priceLevel == 7
+          ? barcodeModels[index].price7.toString()
+          : priceLevel == 8
+          ? barcodeModels[index]
+          .price8
+          .toString()
+          : priceLevel == 9
+          ? barcodeModels[index]
+          .price9
+          .toString()
+          : barcodeModels[index]
+          .price0
+          .toString();
       String unitcodes = barcodeModels[index].unit_code;
       int listAmounts = amounts[index];
-      String listSubtotals = subTotals[index].toString();
+      num _listSubtotals = amounts[index] * num.parse(prices);
+      String listSubtotals = _listSubtotals.toString();//subTotals[index].toString();
       String urlImage = products!['urlImage'];
 
       print(

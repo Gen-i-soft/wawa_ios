@@ -1,9 +1,11 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:wawa/global.dart';
 import 'package:wawa/models/barcode_model.dart';
 import 'package:wawa/models/product_cloud_model.dart';
 import 'package:wawa/states/choose_productnumber.dart';
@@ -32,14 +34,15 @@ class _ChooseProductState extends State<ChooseProduct> {
   String? doct;
   List<BarcodeModel> barcodeModels = [];
   double screen = 0;
-  String uid = 'user';
+  // String uid = 'user';
   Helper helper = Helper();
 
   Future<void> checkUser() async {
-    String? _uid =
-        FirebaseAuth.instance.currentUser!.uid; //ใช้ได้โดยไม่ต้อง add อ่ะ
+    // String? _uid =
+    //     FirebaseAuth.instance.currentUser!.uid; //ใช้ได้โดยไม่ต้อง add อ่ะ
+    String? _uid = await helper.getStorage('uid');
     print('####_uid>>>$_uid');
-    if (_uid.isNotEmpty) {
+    if (_uid != null) {
       setState(() {
         uid = _uid;
       });
@@ -69,7 +72,11 @@ class _ChooseProductState extends State<ChooseProduct> {
   }
 
   Future<void> readProduct() async {
-    barcodeModels.clear();
+    setState(() {
+      barcodeModels.clear();
+      amounts.clear();
+      subTotals.clear();
+    });
     await Firebase.initializeApp().then((value) async {
       await dbRef
           .collection('wawastore')
@@ -78,7 +85,7 @@ class _ChooseProductState extends State<ChooseProduct> {
           .doc(doct)
           .collection('unit_codes')
           .snapshots()
-          .listen((event) {
+          .listen((event) { //web ไม่ double*** แต่ app double
         for (var item in event.docs) {
           BarcodeModel model = BarcodeModel.fromMap(item.data());
           // num _price0 = item['price0'];
@@ -158,6 +165,10 @@ class _ChooseProductState extends State<ChooseProduct> {
                         height: 10,
                       ),
                       buildShowImage(),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      showCode(),
                       const SizedBox(
                         height: 4,
                       ),
@@ -379,7 +390,7 @@ class _ChooseProductState extends State<ChooseProduct> {
   Widget buildTitle() {
     return Padding(
       padding: const EdgeInsets.only(left: 10, right: 10),
-      child: Text(
+      child: AutoSizeText(
         // productModel.name,
         products!['name'],  //worked***
         style: const TextStyle(
@@ -388,8 +399,25 @@ class _ChooseProductState extends State<ChooseProduct> {
           color: Colors.black,
         ),
         overflow: TextOverflow.ellipsis,
-        softWrap: false,
-        maxLines: 5,
+        // softWrap: false,
+        maxLines: 3,
+      ),
+    );
+  }
+  Widget showCode() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 10, right: 10),
+      child: AutoSizeText(
+        // productModel.name,
+        products!.id,  //worked***
+        style: const TextStyle(
+          fontSize: 40,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+        ),
+        overflow: TextOverflow.ellipsis,
+        // softWrap: false,
+        maxLines: 3,
       ),
     );
   }
@@ -430,8 +458,41 @@ class _ChooseProductState extends State<ChooseProduct> {
           ),
           Expanded(
             flex: 1,
-            child: Text(
-              MyStyle().myFormat.format(barcodeModels[index].price0),
+            child:
+            // Text(
+            //   MyStyle().myFormat.format(barcodeModels[index].price0),
+            Text(
+              priceLevel==0 ?
+              MyStyle().myFormat.format(barcodeModels[index].price0)
+                  :
+              priceLevel==1 ?
+              MyStyle().myFormat.format(barcodeModels[index].price1)
+                  :
+              priceLevel==2 ?
+              MyStyle().myFormat.format(barcodeModels[index].price2)
+                  :
+              priceLevel==3 ?
+              MyStyle().myFormat.format(barcodeModels[index].price3)
+                  :
+              priceLevel==4 ?
+              MyStyle().myFormat.format(barcodeModels[index].price4)
+                  :
+              priceLevel==5 ?
+              MyStyle().myFormat.format(barcodeModels[index].price5)
+                  :
+              priceLevel==6 ?
+              MyStyle().myFormat.format(barcodeModels[index].price6)
+                  :
+              priceLevel==7 ?
+              MyStyle().myFormat.format(barcodeModels[index].price7)
+                  :
+              priceLevel==8 ?
+              MyStyle().myFormat.format(barcodeModels[index].price8)
+                  :
+              priceLevel==9 ?
+              MyStyle().myFormat.format(barcodeModels[index].price9)
+
+                  : MyStyle().myFormat.format(barcodeModels[index].price0),
               style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -452,7 +513,30 @@ class _ChooseProductState extends State<ChooseProduct> {
                     if (amounts[index] != 0) {
                       setState(() {
                         amounts[index]--;
-                        subTotals[index] = barcodeModels[index].price0 *
+                        subTotals[index] =
+                            // barcodeModels[index].price0 *
+                            // double.parse(amounts[index].toString());
+                        priceLevel == 0 ? barcodeModels[index].price0 *
+                            double.parse(amounts[index].toString())  :
+                        priceLevel == 1 ? barcodeModels[index].price1 *
+                            double.parse(amounts[index].toString())  :
+                        priceLevel == 2 ? barcodeModels[index].price2 *
+                            double.parse(amounts[index].toString())  :
+                        priceLevel == 3 ? barcodeModels[index].price3 *
+                            double.parse(amounts[index].toString())  :
+                        priceLevel == 4 ? barcodeModels[index].price4 *
+                            double.parse(amounts[index].toString())  :
+                        priceLevel == 5 ? barcodeModels[index].price5 *
+                            double.parse(amounts[index].toString())  :
+                        priceLevel == 6 ? barcodeModels[index].price6 *
+                            double.parse(amounts[index].toString())  :
+                        priceLevel == 7 ? barcodeModels[index].price7 *
+                            double.parse(amounts[index].toString())  :
+                        priceLevel == 8 ? barcodeModels[index].price8 *
+                            double.parse(amounts[index].toString())  :
+                        priceLevel == 9 ? barcodeModels[index].price9 *
+                            double.parse(amounts[index].toString())  :
+                        barcodeModels[index].price0 *
                             double.parse(amounts[index].toString());
                         total = 0;
                         for (var item in subTotals) {
@@ -479,7 +563,30 @@ class _ChooseProductState extends State<ChooseProduct> {
                     // print('You click Add at index ===>> $index');
                     setState(() {
                       amounts[index]++;
-                      subTotals[index] = barcodeModels[index].price0 *
+                      subTotals[index] =
+                          // barcodeModels[index].price0 *
+                          // double.parse(amounts[index].toString());
+                      priceLevel == 0 ? barcodeModels[index].price0 *
+                          double.parse(amounts[index].toString())  :
+                      priceLevel == 1 ? barcodeModels[index].price1 *
+                          double.parse(amounts[index].toString())  :
+                      priceLevel == 2 ? barcodeModels[index].price2 *
+                          double.parse(amounts[index].toString())  :
+                      priceLevel == 3 ? barcodeModels[index].price3 *
+                          double.parse(amounts[index].toString())  :
+                      priceLevel == 4 ? barcodeModels[index].price4 *
+                          double.parse(amounts[index].toString())  :
+                      priceLevel == 5 ? barcodeModels[index].price5 *
+                          double.parse(amounts[index].toString())  :
+                      priceLevel == 6 ? barcodeModels[index].price6 *
+                          double.parse(amounts[index].toString())  :
+                      priceLevel == 7 ? barcodeModels[index].price7 *
+                          double.parse(amounts[index].toString())  :
+                      priceLevel == 8 ? barcodeModels[index].price8 *
+                          double.parse(amounts[index].toString())  :
+                      priceLevel == 9 ? barcodeModels[index].price9 *
+                          double.parse(amounts[index].toString())  :
+                      barcodeModels[index].price0 *
                           double.parse(amounts[index].toString());
                       total = 0;
                       for (var item in subTotals) {
@@ -520,7 +627,7 @@ class _ChooseProductState extends State<ChooseProduct> {
     int index = 0;
     for (var item in amounts) {
       String? code = doct;
-      String name = products!['name'];
+      String? name = products!['name'];
 
       // final int id;
       // final String code;
@@ -549,11 +656,25 @@ class _ChooseProductState extends State<ChooseProduct> {
       // final int databaseversion = 1;
 
       //String barcodes = barcodeModels[index].barcode;
-      String prices = barcodeModels[index].price0.toString();
-      String unitcodes = barcodeModels[index].unit_code;
+      String? prices =
+      // barcodeModels[index].price0.toString();
+      priceLevel == 0 ?  barcodeModels[index].price0.toString()  :
+      priceLevel == 1 ?  barcodeModels[index].price1.toString()  :
+      priceLevel == 2 ?  barcodeModels[index].price2.toString()  :
+      priceLevel == 3 ?  barcodeModels[index].price3.toString()  :
+      priceLevel == 4 ?  barcodeModels[index].price4.toString()  :
+      priceLevel == 5 ?  barcodeModels[index].price5.toString()  :
+      priceLevel == 6 ?  barcodeModels[index].price6.toString()  :
+      priceLevel == 7 ?  barcodeModels[index].price7.toString()  :
+      priceLevel == 8 ?  barcodeModels[index].price8.toString()  :
+      priceLevel == 9 ?  barcodeModels[index].price9.toString()  :
+      barcodeModels[index].price0.toString();
+
+      String? unitcodes = barcodeModels[index].unit_code;
       int listAmounts = amounts[index];
-      String listSubtotals = subTotals[index].toString();
-      String urlImage = products!['urlImage'];
+      num _listSubtotals = amounts[index] * num.parse(prices);
+      String? listSubtotals = _listSubtotals.toString();//subTotals[index].toString();
+      String? urlImage = products!['urlImage'];
 
       // print(  //worked!!!
       //     'code = $code, name=$name,  prices=$prices, unitcodes=$unitcodes, listAmount=$listAmounts, listSubtotals=$listSubtotals');
@@ -586,7 +707,7 @@ class _ChooseProductState extends State<ChooseProduct> {
     "picturl": urlImage
   });
 }
- //insert inCart
+ //***insert inCart
       if (listAmounts >0) {
         await FirebaseFirestore.instance
             .collection('wawastore')
@@ -613,10 +734,7 @@ class _ChooseProductState extends State<ChooseProduct> {
   }
 
   void showToast(String msg) {
-    // Toast.show(msg, context,
-    //     backgroundColor: Colors.orange[100],
-    //     textColor: Colors.orange[800],
-    //     duration: 3);
+
     Fluttertoast.showToast(
         msg: msg,
         toastLength: Toast.LENGTH_LONG,
@@ -624,6 +742,6 @@ class _ChooseProductState extends State<ChooseProduct> {
         timeInSecForIosWeb: 1,
         backgroundColor: Colors.red,
         textColor: Colors.white,
-        fontSize: 16.0);
+        fontSize: 24.0);
   }
 }

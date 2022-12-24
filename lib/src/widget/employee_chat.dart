@@ -20,10 +20,10 @@ class EmployeeChatItem extends StatelessWidget {
       title: const Text('พนักงาน'),
       subtitle: Wrap(
         children: [
-           Text('${message['message']}'),message['isOpened'] ? const Text(' (อ่านแล้ว)')  :const Text('')
+           Text('${message['message']}',style: const TextStyle(fontSize: 30),),message['isOpened'] ? const Text(' (อ่านแล้ว)',style:  TextStyle(fontSize: 20),)  :const Text('')
         ],
       ),
-      trailing: Text('${helper.timestampToTime2(date)} ${helper.timestampToTime(date)}น.'),
+      trailing: Text('${helper.timestampToTime2(date)} ${helper.timestampToTime(date)}น.',style: const TextStyle(fontSize: 20),),
     );
   }
 }

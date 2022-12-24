@@ -12,12 +12,12 @@ import 'package:wawa/utility/my_style.dart';
 //import 'package:wawa/models/product_model.dart';
 //import 'package:wawa/utility/my_style.dart';
 
-class SyncDataByRange extends StatefulWidget {
+class SyncDataByRangeBackUp extends StatefulWidget {
   @override
-  _SyncDataByRangeState createState() => _SyncDataByRangeState();
+  _SyncDataByRangeBackUpState createState() => _SyncDataByRangeBackUpState();
 }
 
-class _SyncDataByRangeState extends State<SyncDataByRange> {
+class _SyncDataByRangeBackUpState extends State<SyncDataByRangeBackUp> {
  // List<GenderModel> genderModelList = [];
   String? selectedGender;
   List<String> categories = [];

@@ -14,6 +14,8 @@ import 'package:wawa/utility/my_style.dart';
 //import 'package:wawa/utility/my_style.dart';
 
 class SyncDataByRangeTwo extends StatefulWidget {
+  const SyncDataByRangeTwo({Key? key}) : super(key: key);
+
   @override
   _SyncDataByRangeTwoState createState() => _SyncDataByRangeTwoState();
 }
@@ -142,7 +144,7 @@ class _SyncDataByRangeTwoState extends State<SyncDataByRangeTwo> {
     getMin();
   }
 
-  Future<Null> freshDataByCategory(int minNumber, int maxNumber) async {
+  Future<void> freshDataByCategory(int minNumber, int maxNumber) async {
     await FirebaseFirestore.instance
         .collection('wawastore')
         .doc('wawastore')
@@ -167,7 +169,7 @@ class _SyncDataByRangeTwoState extends State<SyncDataByRangeTwo> {
         try {
           String urlAPI =
               'http://43.229.149.11:8086/SMLJavaRESTService/v3/api/product/$code';
-          Map<String, String> headers = Map();
+          Map<String, String> headers = {};
           headers['GUID'] = 'smlx';
           headers['provider'] = 'DATA';
           headers['databasename'] = 'wawa2';
@@ -202,7 +204,7 @@ class _SyncDataByRangeTwoState extends State<SyncDataByRangeTwo> {
             //work แต่ไม่รู้ว่า error ตรงไหน
             var priceFormulas = [];
 
-            if (value2.data['data']['price_formulas'].toString().length > 0) {
+            if (value2.data['data']['price_formulas'].toString().isNotEmpty) {
               priceFormulas = value2.data['data']['price_formulas'];
               print('######priceFormulas>>>${priceFormulas.toString()}');
             }
@@ -243,7 +245,7 @@ class _SyncDataByRangeTwoState extends State<SyncDataByRangeTwo> {
               groupMainName = value2.data['data']['group_main_name'];
             }
 
-            Map<String, dynamic> mapName = Map();
+            Map<String, dynamic> mapName = {};
             mapName['name'] = _name;
             mapName['urlImage'] = _image;
             mapName['categoryName'] = _categoryName;
@@ -279,6 +281,15 @@ class _SyncDataByRangeTwoState extends State<SyncDataByRangeTwo> {
                   .doc(priceFormulas[i]['unit_code'])
                   .set({
                 "price0": num.parse(priceFormulas[i]['price_0'].toString()),
+                "price1": num.parse(priceFormulas[i]['price_1'].toString()),
+                "price2": num.parse(priceFormulas[i]['price_2'].toString()),
+                "price3": num.parse(priceFormulas[i]['price_3'].toString()),
+                "price4": num.parse(priceFormulas[i]['price_4'].toString()),
+                "price5": num.parse(priceFormulas[i]['price_5'].toString()),
+                "price6": num.parse(priceFormulas[i]['price_6'].toString()),
+                "price7": num.parse(priceFormulas[i]['price_7'].toString()),
+                "price8": num.parse(priceFormulas[i]['price_8'].toString()),
+                "price9": num.parse(priceFormulas[i]['price_9'].toString()),
                 "unit_code": priceFormulas[i]['unit_code'],
               }).then((value) {
                 print('inserted Success>>>${priceFormulas[i]['unit_code']}');
@@ -1230,7 +1241,7 @@ class _SyncDataByRangeTwoState extends State<SyncDataByRangeTwo> {
           .limit(5)
           // .where('orderId', isEqualTo: _uId)
           .get();
-      if (qsDashboard.docs.length != 0) {
+      if (qsDashboard.docs.isNotEmpty) {
         setState(() {
           _i = qsDashboard.docs[0]['no'];
         });

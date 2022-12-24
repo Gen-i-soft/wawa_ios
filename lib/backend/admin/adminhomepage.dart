@@ -10,6 +10,8 @@ import 'package:wawa/states/create_account.dart';
 import 'package:wawa/states/home.dart';
 import 'package:wawa/syn_data_by_range.dart';
 import 'package:wawa/syn_data_by_range_two.dart';
+import 'package:wawa/sync_customers.dart';
+import 'package:wawa/utility/helper.dart';
 import 'package:wawa/utility/my_style.dart';
 import 'package:wawa/widget/productitembox.dart';
 
@@ -23,6 +25,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
   String? email;
   String? name;
   bool superAdmin = false;
+  Helper helper = Helper();
 
   int selectedIndex = 0;
   List pages = [AdminOrderPage(), AdminChatPage()];
@@ -41,11 +44,31 @@ class _AdminHomePageState extends State<AdminHomePage> {
   // }
 
   Future checkLogin() async {
-    await Firebase.initializeApp().then((value) async {
-      FirebaseAuth.instance.authStateChanges().listen((event) async {
-        setState(() {
-          email = event!.email;
-          name = event.displayName;
+    // await Firebase.initializeApp().then((value) async {
+    //   FirebaseAuth.instance.authStateChanges().listen((event) async {
+    String _uid = await helper.getStorage('uid') ?? 'user';
+
+    if (_uid != 'user') {
+      QuerySnapshot qsTypeUser = await FirebaseFirestore.instance
+          .collection('wawastore')
+          .doc('wawastore')
+          .collection('backend')
+          .where('uid', isEqualTo: _uid)
+          .get(); //ยัง worked in web***
+
+      String _typeUser = qsTypeUser.docs[0]['typeUser'];
+      setState(() {
+        name = qsTypeUser.docs[0]['displayName']; //event.displayName;
+        // nameLogin = qsTypeUser.docs[0]['displayName'];
+        email = qsTypeUser.docs[0]['email'];//event.email;
+        // userEmail = qsTypeUser.docs[0]['email']; //event.email;
+      });
+
+
+    }
+    // setState(() {
+    //       email = event!.email;
+    //       name = event.displayName;
           // if(email == 'lek2@g.com' ){
           //   setState(() {
           //     superAdmin = true;
@@ -58,19 +81,19 @@ class _AdminHomePageState extends State<AdminHomePage> {
             });
           }
 
-          if(email == 'wawa@wawa.com' ){
-            setState(() {
-              superAdmin = true;
-            });
-          }
-        });
+          // if(email == 'wawa@wawa.com' ){
+          //   setState(() {
+          //     superAdmin = true;
+          //   });
+          // }
+        // });
 
-        QuerySnapshot qsUser = await FirebaseFirestore.instance
-            .collection('wawastore')
-            .doc('wawastore')
-            .collection('backend')
-            .where('uid', isEqualTo: event!.uid)
-            .get();
+        // QuerySnapshot qsUser = await FirebaseFirestore.instance
+        //     .collection('wawastore')
+        //     .doc('wawastore')
+        //     .collection('backend')
+        //     .where('uid', isEqualTo: event!.uid)
+        //     .get();
 
         // if (qsUser.docs.length > 0) {
         //   if (qsUser.docs[0].data().containsKey('superAdmin'))
@@ -85,8 +108,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
         //   //
         //   // helper.setStorage('emTel', emTel);
         // }
-      });
-    });
+      // });
+    // });
   }
 
   Future<void> confirmSynAllData() async {
@@ -160,7 +183,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                         onPressed: () {
                           Navigator.of(context).pop();
                           Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => SyncDataByRange(),
+                            builder: (context) => const SyncDataByRange(),
                           ));
 
                           // if (lat1 == 0) {
@@ -286,7 +309,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                     onPressed: () {
                       Navigator.of(context).pop();
                       Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => SyncDataByRangeTwo(),
+                        builder: (context) => const SyncDataByRangeTwo(),
                       ));
 
                       // if (lat1 == 0) {
@@ -443,13 +466,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
               )
             ],
           ),
-          actions: [
-            // IconButton(
-            //   icon: Icon(Icons.exit_to_app),
-            //   onPressed: () {
-            //     logout();
-            //   },
-            // ),
+          actions: const [
+
           ],
         ),
         drawer: Drawer(
@@ -543,15 +561,15 @@ class _AdminHomePageState extends State<AdminHomePage> {
                   ));
                 },
                 leading:
-                    Icon(Icons.supervised_user_circle, color: Colors.black),
-                title: Text(
+                    const Icon(Icons.supervised_user_circle, color: Colors.black),
+                title: const Text(
                   'ลงทะเบียนลูกค้าใหม่',
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.black),
                 ),
-                trailing: Icon(Icons.arrow_right, color: Colors.black),
+                trailing: const Icon(Icons.arrow_right, color: Colors.black),
               ),
               // ListTile(
               //   leading: Icon(Icons.folder_open, color: Colors.blue[700]),
@@ -607,27 +625,27 @@ class _AdminHomePageState extends State<AdminHomePage> {
               ),
                  // : SizedBox(),
 
-              // superAdmin
-              //     ?
-              // ListTile(
-              //   onTap: () {
-              //     // confirmSynAllData();
-              //     Navigator.of(context).push(MaterialPageRoute(
-              //       builder: (context) => SynByCode(),
-              //     ));
-              //   },
-              //   leading: Icon(Icons.cloud_download_outlined,
-              //       color: Colors.blue[700]),
-              //   title: Text(
-              //     'Sync Data by ที่ละรายการสินค้า',
-              //     style: TextStyle(
-              //         fontSize: 20,
-              //         fontWeight: FontWeight.bold,
-              //         color: Colors.blue[700]),
-              //   ),
-              //   trailing: Icon(Icons.arrow_right, color: Colors.blue[200]),
-              // ),
-              //: SizedBox(),
+
+              superAdmin
+                  ?  ListTile(
+                onTap: () {
+                  // confirmSynAllData();
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const SyncCustomers(),
+                  ));
+                },
+                leading: Icon(Icons.cloud_download_outlined,
+                    color: Colors.blue[700]),
+                title: Text(
+                  'Sync ข้อมูลลูกหนี้',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue[700]),
+                ),
+                trailing: Icon(Icons.arrow_right, color: Colors.blue[200]),
+              ) : const SizedBox(),
+
               // superAdmin
               //       ?   ListTile(
               //     onTap: () {
@@ -682,7 +700,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                       color: Colors.black
                   ),
                 ),
-                trailing: Icon(Icons.arrow_right, color: Colors.black),
+                trailing: const Icon(Icons.arrow_right, color: Colors.black),
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => HomePage(onAdItem: (){},),

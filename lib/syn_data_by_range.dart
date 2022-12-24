@@ -13,6 +13,8 @@ import 'package:wawa/utility/my_style.dart';
 //import 'package:wawa/utility/my_style.dart';
 
 class SyncDataByRange extends StatefulWidget {
+  const SyncDataByRange({Key? key}) : super(key: key);
+
   @override
   _SyncDataByRangeState createState() => _SyncDataByRangeState();
 }
@@ -191,38 +193,47 @@ class _SyncDataByRangeState extends State<SyncDataByRange> {
           await Dio()
               .get(urlAPI, options: Options(headers: headers))
               .then((value2) async {
-            print('value2==>${value2.toString()}');
-            var _name = '';
-            if (value2.data['data']['name'] != null || value2.data['data']['brand_name'] != "null") {
-              _name = value2.data['data']['name'];
-            }
+            // print('value2==>${value2.toString()}');
+            // print('######priceFormulas>>>${priceFormulas.toString()}');
+            print('####code==>$item');
+            // var _name = '';
+            // if (value2.data['data']['name'] != null || value2.data['data']['brand_name'] != "null") {
+            //   _name = value2.data['data']['name'];
+            // }
+
+            String? _name = value2.data['data']['name'];
             // //off เพื่อรู้ว่าตัวไหน error
-            var _image = 'none';
-            if (value2.data['data']['images'] != null || value2.data['data']['brand_name'] != "null") {
-              _image = value2.data['data']['images'][0]['uri'];
-            }
+            // var _image = 'none';
+            // if (value2.data['data']['images'] != null || value2.data['data']['brand_name'] != "null") {
+            //   _image = value2.data['data']['images'][0]['uri'];
+            // }
+            String? _image = value2.data['data']['images'][0]['uri'];
 
             //var _image = value2.data['data']['images'][0]['uri'];
 
-            var _categoryName = '';
-            if (value2.data['data']['category_name'] != null || value2.data['data']['brand_name'] != "null") {
-              _categoryName = value2.data['data']['category_name'];
-            }
+            // var _categoryName = '';
+            // if (value2.data['data']['category_name'] != null || value2.data['data']['brand_name'] != "null") {
+            //   _categoryName = value2.data['data']['category_name'];
+            // }
+            String? _categoryName = value2.data['data']['category_name'];
 
-            var _itemCategory = '';
-            if (value2.data['data']['item_category'] != null || value2.data['data']['brand_name'] != "null") {
-              _itemCategory = value2.data['data']['item_category'];
-            }
+            // var _itemCategory = '';
+            // if (value2.data['data']['item_category'] != null || value2.data['data']['brand_name'] != "null") {
+            //   _itemCategory = value2.data['data']['item_category'];
+            // }
+          String?  _itemCategory = value2.data['data']['item_category'];
 
             //work แต่ไม่รู้ว่า error ตรงไหน
-            var priceFormulas = [];
+            // var priceFormulas = [];
+            //
+            // if (value2.data['data']['price_formulas']
+            //     .toString()
+            //     .isNotEmpty) {
+            //   priceFormulas = value2.data['data']['price_formulas'];
+            //   // print('######priceFormulas>>>${priceFormulas.toString()}');
+            // }
 
-            if (value2.data['data']['price_formulas']
-                .toString()
-                .isNotEmpty) {
-              priceFormulas = value2.data['data']['price_formulas'];
-              print('######priceFormulas>>>${priceFormulas.toString()}');
-            }
+         var   priceFormulas = value2.data['data']['price_formulas'];
 
             // if (value2.data['data']['price_formulas'] != null) {
             //var priceFormulas = value2.data['data']['price_formulas'];
@@ -235,36 +246,44 @@ class _SyncDataByRangeState extends State<SyncDataByRange> {
 
             // //error จะดีกว่า จะได้รู้ว่ารหัสอะไร
 
-            var isPremium = false;
-            // if (value2.data['data']['is_premium'] != null) {
-              setState(() {
-                isPremium = value2.data['data']['is_premium'];  //default = false
-              });
+            // var isPremium = false;
+            // // if (value2.data['data']['is_premium'] != null) {
+            //   setState(() {
+            //     isPremium = value2.data['data']['is_premium'];  //default = false
+            //   });
+          bool  isPremium = value2.data['data']['is_premium'] ?? false;
             // }
             //add 16-6-2021
-            var isHoldSale = false;
-            // if (value2.data['data']['is_hold_sale'] != null) {
-              setState(() {
-                isHoldSale = value2.data['data']['is_hold_sale'];
-              });
+            // var isHoldSale = false;
+            // // if (value2.data['data']['is_hold_sale'] != null) {
+            //   setState(() {
+            //     isHoldSale = value2.data['data']['is_hold_sale'];
+            //   });
+            // }
+            bool isHoldSale = value2.data['data']['is_hold_sale'] ?? false;
+
+            // var isHoldPurchase = false;
+            // // if (value2.data['data']['is_hold_purchase'] != null) {
+            //   setState(() {
+            //     isHoldPurchase = value2.data['data']['is_hold_purchase'];
+            //   });
+            // }
+          bool  isHoldPurchase = value2.data['data']['is_hold_purchase'] ?? false;
+
+            // var brandName = 'zzz';
+            // if (value2.data['data']['brand_name'] != null || value2.data['data']['brand_name'] != "null") {
+            //   brandName = value2.data['data']['brand_name'];
+            // }
+            //
+
+            String brandName = value2.data['data']['brand_name'] ?? 'zzz';
+
+            // var groupMainName = 'yyy';
+            // if (value2.data['data']['group_main_name'] != null || value2.data['data']['brand_name'] != "null") {
+            //   groupMainName = value2.data['data']['group_main_name'];
             // }
 
-            var isHoldPurchase = false;
-            // if (value2.data['data']['is_hold_purchase'] != null) {
-              setState(() {
-                isHoldPurchase = value2.data['data']['is_hold_purchase'];
-              });
-            // }
-
-            var brandName = 'zzz';
-            if (value2.data['data']['brand_name'] != null || value2.data['data']['brand_name'] != "null") {
-              brandName = value2.data['data']['brand_name'];
-            }
-
-            var groupMainName = 'yyy';
-            if (value2.data['data']['group_main_name'] != null || value2.data['data']['brand_name'] != "null") {
-              groupMainName = value2.data['data']['group_main_name'];
-            }
+            String groupMainName = value2.data['data']['group_main_name'] ?? 'yyy';
 
             Map<String, dynamic> mapName = {};
             mapName['name'] = _name;
@@ -292,7 +311,7 @@ class _SyncDataByRangeState extends State<SyncDataByRange> {
             }
 
             //clear old code  || delete data by code in searchDB mySQL***
-            deleteApi(item, _name, _image , isHoldSale, isHoldPurchase );
+            deleteApi(item, _name!, _image! , isHoldSale, isHoldPurchase );
 
 
 
@@ -305,7 +324,7 @@ class _SyncDataByRangeState extends State<SyncDataByRange> {
                   .doc(item)
                   .set(mapName);
             } on Exception catch (e) {
-              print('####e.toString() /product2 + .doc(code) +  .set(mapName) >>>===${e.toString()}');
+              // print('####e.toString() /product2 + .doc(code) +  .set(mapName) >>>===${e.toString()}');
               // TODO
             }
             //clear all if value != 0;
@@ -326,7 +345,16 @@ class _SyncDataByRangeState extends State<SyncDataByRange> {
                     .collection('unit_codes')
                     .doc(priceFormulas[i]['unit_code'])
                     .set({
-                  "price0": num.parse(priceFormulas[i]['price_0'].toString()),
+                  "price0":  num.parse(priceFormulas[i]['price_0'].toString()) ?? 0 ,
+                  "price1": num.parse(priceFormulas[i]['price_1'].toString()) ?? 0,
+                  "price2": num.parse(priceFormulas[i]['price_2'].toString()) ?? 0,
+                  "price3": num.parse(priceFormulas[i]['price_3'].toString()) ?? 0,
+                  "price4": num.parse(priceFormulas[i]['price_4'].toString()) ?? 0,
+                  "price5": num.parse(priceFormulas[i]['price_5'].toString()) ?? 0,
+                  "price6": num.parse(priceFormulas[i]['price_6'].toString()) ?? 0,
+                  "price7": num.parse(priceFormulas[i]['price_7'].toString()) ?? 0,
+                  "price8": num.parse(priceFormulas[i]['price_8'].toString()) ?? 0,
+                  "price9": num.parse(priceFormulas[i]['price_9'].toString()) ?? 0,
                   "unit_code": priceFormulas[i]['unit_code'],
                 }).then((value) {
                   // print('####success!!!.collection(\'product2\'+ .doc(code)+ .collection(\'unit_codes\')+ .doc(priceFormulas[i][\'unit_code\'])  inserted Success!!!)/>>>${priceFormulas[i]['unit_code']}');
@@ -350,7 +378,7 @@ class _SyncDataByRangeState extends State<SyncDataByRange> {
           // double _nummax = numx.toDouble();
           // double _v = _numm/_nummax;
           double _v = _numm*100/_nummax;
-          double _v2 = _numm * 0.5 / _nummax;
+          double _v2 = _numm * 0.5 / _nummax;  //ค่าในวงกลม อนิเมชั่น
           setState(() {
             uploadPer = _v2;
             _percent = _v;
@@ -434,7 +462,7 @@ class _SyncDataByRangeState extends State<SyncDataByRange> {
 
   }
   Future getMin() async{
-  String _numm =  await helper.getStorage('numm');
+  String? _numm =  await helper.getStorage('numm');
 
   if(_numm != null){
     int _no = int.parse(_numm);
@@ -537,7 +565,7 @@ class _SyncDataByRangeState extends State<SyncDataByRange> {
                 height: 75,
                 child: LiquidCircularProgressIndicator(
                   backgroundColor: Colors.black,
-                  valueColor: AlwaysStoppedAnimation(Colors.red),
+                  valueColor: const AlwaysStoppedAnimation(Colors.red),
                 ),
               ),
               SizedBox(
@@ -545,7 +573,7 @@ class _SyncDataByRangeState extends State<SyncDataByRange> {
                 height: 75,
                 child: LiquidCircularProgressIndicator(
                   backgroundColor: Colors.white,
-                  valueColor: AlwaysStoppedAnimation(Colors.pink),
+                  valueColor: const AlwaysStoppedAnimation(Colors.pink),
                   borderColor: Colors.red,
                   borderWidth: 5.0,
                   direction: Axis.horizontal,
@@ -556,7 +584,7 @@ class _SyncDataByRangeState extends State<SyncDataByRange> {
                 height: 75,
                 child: LiquidCircularProgressIndicator(
                   backgroundColor: Colors.white,
-                  valueColor: AlwaysStoppedAnimation(Colors.grey),
+                  valueColor: const AlwaysStoppedAnimation(Colors.grey),
                   borderColor: Colors.blue,
                   borderWidth: 5.0,
                   center: const Text(
@@ -573,7 +601,7 @@ class _SyncDataByRangeState extends State<SyncDataByRange> {
                 height: 75,
                 child: LiquidCircularProgressIndicator(
                   backgroundColor: Colors.lightGreen,
-                  valueColor: AlwaysStoppedAnimation(Colors.blueGrey),
+                  valueColor: const AlwaysStoppedAnimation(Colors.blueGrey),
                   direction: Axis.horizontal,
                 ),
               ),
@@ -584,7 +612,7 @@ class _SyncDataByRangeState extends State<SyncDataByRange> {
     );
   }
   Future<void> deleteApi(String item, String _name,String _image, bool isHoldSale, bool isHoldPurchase ) async {
-    Map<String, String> headers = Map();
+    Map<String, String> headers = {};
     headers['Content-Type'] = 'application/x-www-form-urlencoded';
 
     Response response;
@@ -614,7 +642,7 @@ class _SyncDataByRangeState extends State<SyncDataByRange> {
       bool isHoldPurchase
       ) async {
 
-    Map<String, String> headers = Map();
+    Map<String, String> headers = {};
     headers['Content-Type'] = 'application/x-www-form-urlencoded';
 
     Response response;
@@ -638,7 +666,7 @@ class _SyncDataByRangeState extends State<SyncDataByRange> {
 
 class _AnimatedLiquidCircularProgressIndicator extends StatefulWidget {
   final double percentUpload;
-  _AnimatedLiquidCircularProgressIndicator({required this.percentUpload});
+  const _AnimatedLiquidCircularProgressIndicator({required this.percentUpload});
   
   @override
   State<StatefulWidget> createState() =>
@@ -655,7 +683,7 @@ class _AnimatedLiquidCircularProgressIndicatorState
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 10),
+      duration: const Duration(seconds: 10),
     );
 
     _animationController!.addListener(() => setState(() {}));
@@ -678,10 +706,10 @@ class _AnimatedLiquidCircularProgressIndicatorState
         child: LiquidCircularProgressIndicator(
           value: widget.percentUpload,
           backgroundColor: Colors.white,
-          valueColor: AlwaysStoppedAnimation(Colors.blue),
+          valueColor: const AlwaysStoppedAnimation(Colors.blue),
           center: Text(
             "${percentage.toStringAsFixed(0)}%",
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.lightBlueAccent,
               fontSize: 20.0,
               fontWeight: FontWeight.bold,

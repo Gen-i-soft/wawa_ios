@@ -37,13 +37,13 @@ class CustomerChatItem extends StatelessWidget {
                   children: [
                     Text(
                       '${message['message']}',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),message['isOpened'] ? const Text(' (อ่านแล้ว)')  :const Text('')
+                      style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                    ),message['isOpened'] ? const Text(' (อ่านแล้ว)',style:  TextStyle(fontSize: 20),)  :const Text('')
                   ],
                 ),
               ),
              
-              Positioned(bottom: 1, right: 10, child: Text('${helper.timestampToTime2(date)} ${helper.timestampToTime(date)}น.'))
+              Positioned(bottom: 1, right: 10, child: Text('${helper.timestampToTime2(date)} ${helper.timestampToTime(date)}น.',style: const TextStyle(fontSize: 20),))
             ],
           ),
         ),

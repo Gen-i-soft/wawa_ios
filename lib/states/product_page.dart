@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'package:flutter/material.dart';
 import 'package:responsive_grid/responsive_grid.dart';
+import 'package:wawa/global.dart';
 import 'package:wawa/models/docobj_model.dart';
 
 import 'package:wawa/models/product_cloud_model.dart';
@@ -26,20 +27,23 @@ class ProductPage extends StatefulWidget {
 class _ProductPageState extends State<ProductPage> {
   double screen = 0;
   double screen2 = 0;
-  //String categoryId;
-  String uid = 'user';
+  // String categoryId;
+  // String uid = 'user';
 
   double sizeWidth = 0;
   int totalItems = 0;
   double total = 0;
   bool showButton = false;
+  bool isMaxData = false;
+
+
   // ScrollController scrollController = ScrollController();
   int amountListView = 6;
   //List<Widget> widgets = List();
   //อันนีัเตือนแต่ ไม่แดง ปล่อยผ่านจ้า
 
   bool loading = false;
-  String categoryId = 'เครื่องดื่ม/นม';
+  String categoryId = 'ขนม';
   List<DocumentSnapshot> products = [];
   List<DocObjModel> listDocument = [];
   List<dynamic> widgets = [];
@@ -64,138 +68,138 @@ class _ProductPageState extends State<ProductPage> {
     setState(() {
       uid = _uid;
     });
-    print('####uid news==$uid');
+    print('####uid / checkLogin ==$uid');
   }
 
-  Future<void> getProduct() async {
-    setState(() {
-      //  products.clear();
-      loading = true;
-    });
-
-    try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('wawastore')
-          .doc('wawastore')
-          .collection('product2')
-          .where('categoryName', isEqualTo: categoryId)
-          // .where('isHoldSale', isEqualTo: false)
-          // .where('isHoldPurchase', isEqualTo: false)
-          .orderBy('brandName')
-          .orderBy('groupMainName')
-          .get();
-
-      setState(() {
-        loading = false;
-        products = snapshot.docs;
-      });
-
-      // if (snapshot.docs.length > 0) {
-
-      //   // for (var item in snapshot.docs) {
-      //   //   print('####item>>>${item['name']}');
-      //   //   products.add(item);
-      //   // }
-      // }
-    } catch (e) {
-      print('###error jaa>>>${e.toString()}');
-      // TODO
-    }
-
-    //  try {
-    //   await FirebaseFirestore.instance
-    //       .collection('wawastore')
-    //       .doc('wawastore')
-    //       .collection('product2')
-    //       .where('categoryName', isEqualTo: categoryId)
-    //       .where('isHoldSale', isEqualTo:false)
-    //       .orderBy('brandName')
-    //       .orderBy('groupMainName')
-    //       .snapshots()
-    //       .listen((event) {
-    //            setState(() {
-    //       loading = false;
-    //       for (var item in event.docs) {
-    //         products.add(item);
-    //       }
-
-    //     });
-
-    //       });
-    // } catch (e) {
-    //   print('###error jaa>>>${e.toString()}');
-    //         // TODO
-    // }
-
-    //.where('isOn', isNotEqualTo: false)
-    // .where('urlImage', isNotEqualTo: '')
-    // .limit(200)
-    // await Firebase.initializeApp().then((value) async {
-    // if (categoryId == null) {
-    //   QuerySnapshot snapshot = await FirebaseFirestore.instance
-    //       .collection('wawastore')
-    //       .doc('wawastore')
-    //       .collection('product2')
-    //       //.orderBy('groupMainName')
-    //       //.orderBy('brandName')
-    //       //.where('isOn', isNotEqualTo: false)
-    //       // .where('urlImage', isNotEqualTo: '')
-    //       // .limit(200)
-
-    //       .get();
-    //   setState(() {
-    //     loading = false;
-    //     products = snapshot.docs;
-    //   });
-    //   // print('i am null');
-    // } else {
-    //   QuerySnapshot snapshot = await FirebaseFirestore.instance
-    //       .collection('wawastore')
-    //       .doc('wawastore')
-    //       .collection('product2')
-
-    //       // .orderBy('brandName')
-    //       // .where('urlImage', isNotEqualTo: '')
-    //       .where('categoryName', isEqualTo: categoryId)
-    //       //.orderBy('groupMainName', descending: true)
-    //      // .orderBy('groupMainName', descending: false)
-    //      // .orderBy('brandName')
-
-    //       .get();
-    //   setState(() {
-    //     loading = false;
-    //     products = snapshot.docs;
-    //   });
-
-    //   // print('i am not null');
-    // }
-
-    // print('####products==>>$products');
-
-    // try {
-    //   await FirebaseFirestore.instance
-    //       .collection('product')
-    //       .where('urlImage', isNotEqualTo: '')
-    //       .snapshots()
-    //       .listen((event) async {
-    //     int index = 0;
-    //     for (var snapshot in event.docs) {
-    //       ProductCloudModel model =
-    //           ProductCloudModel.fromMap(snapshot.data());
-    //       docts.add(snapshot.id);
-
-    //       setState(() {
-    //         productModels.add(model);
-    //         widgets.add(createWidget(model, index));
-    //       });
-    //       index++;
-    //     }
-    //   });
-    // } catch (e) {
-    //   print('e>>>${e.toString()}');
-    // }
-    // });
-  }
+  // Future<void> getProduct() async {
+  //   setState(() {
+  //     products.clear();
+  //     loading = true;
+  //   });
+  //
+  //   try {
+  //     QuerySnapshot snapshot = await FirebaseFirestore.instance
+  //         .collection('wawastore')
+  //         .doc('wawastore')
+  //         .collection('product2')
+  //         .where('categoryName', isEqualTo: categoryId)
+  //         // .where('isHoldSale', isEqualTo: false)
+  //         // .where('isHoldPurchase', isEqualTo: false)
+  //         .orderBy('brandName')
+  //         .orderBy('groupMainName')
+  //         .get();
+  //
+  //     setState(() {
+  //       loading = false;
+  //       products = snapshot.docs;
+  //     });
+  //
+  //     // if (snapshot.docs.length > 0) {
+  //
+  //     //   // for (var item in snapshot.docs) {
+  //     //   //   print('####item>>>${item['name']}');
+  //     //   //   products.add(item);
+  //     //   // }
+  //     // }
+  //   } catch (e) {
+  //     print('###error jaa>>>${e.toString()}');
+  //     // TODO
+  //   }
+  //
+  //   //  try {
+  //   //   await FirebaseFirestore.instance
+  //   //       .collection('wawastore')
+  //   //       .doc('wawastore')
+  //   //       .collection('product2')
+  //   //       .where('categoryName', isEqualTo: categoryId)
+  //   //       .where('isHoldSale', isEqualTo:false)
+  //   //       .orderBy('brandName')
+  //   //       .orderBy('groupMainName')
+  //   //       .snapshots()
+  //   //       .listen((event) {
+  //   //            setState(() {
+  //   //       loading = false;
+  //   //       for (var item in event.docs) {
+  //   //         products.add(item);
+  //   //       }
+  //
+  //   //     });
+  //
+  //   //       });
+  //   // } catch (e) {
+  //   //   print('###error jaa>>>${e.toString()}');
+  //   //         // TODO
+  //   // }
+  //
+  //   //.where('isOn', isNotEqualTo: false)
+  //   // .where('urlImage', isNotEqualTo: '')
+  //   // .limit(200)
+  //   // await Firebase.initializeApp().then((value) async {
+  //   // if (categoryId == null) {
+  //   //   QuerySnapshot snapshot = await FirebaseFirestore.instance
+  //   //       .collection('wawastore')
+  //   //       .doc('wawastore')
+  //   //       .collection('product2')
+  //   //       //.orderBy('groupMainName')
+  //   //       //.orderBy('brandName')
+  //   //       //.where('isOn', isNotEqualTo: false)
+  //   //       // .where('urlImage', isNotEqualTo: '')
+  //   //       // .limit(200)
+  //
+  //   //       .get();
+  //   //   setState(() {
+  //   //     loading = false;
+  //   //     products = snapshot.docs;
+  //   //   });
+  //   //   // print('i am null');
+  //   // } else {
+  //   //   QuerySnapshot snapshot = await FirebaseFirestore.instance
+  //   //       .collection('wawastore')
+  //   //       .doc('wawastore')
+  //   //       .collection('product2')
+  //
+  //   //       // .orderBy('brandName')
+  //   //       // .where('urlImage', isNotEqualTo: '')
+  //   //       .where('categoryName', isEqualTo: categoryId)
+  //   //       //.orderBy('groupMainName', descending: true)
+  //   //      // .orderBy('groupMainName', descending: false)
+  //   //      // .orderBy('brandName')
+  //
+  //   //       .get();
+  //   //   setState(() {
+  //   //     loading = false;
+  //   //     products = snapshot.docs;
+  //   //   });
+  //
+  //   //   // print('i am not null');
+  //   // }
+  //
+  //   // print('####products==>>$products');
+  //
+  //   // try {
+  //   //   await FirebaseFirestore.instance
+  //   //       .collection('product')
+  //   //       .where('urlImage', isNotEqualTo: '')
+  //   //       .snapshots()
+  //   //       .listen((event) async {
+  //   //     int index = 0;
+  //   //     for (var snapshot in event.docs) {
+  //   //       ProductCloudModel model =
+  //   //           ProductCloudModel.fromMap(snapshot.data());
+  //   //       docts.add(snapshot.id);
+  //
+  //   //       setState(() {
+  //   //         productModels.add(model);
+  //   //         widgets.add(createWidget(model, index));
+  //   //       });
+  //   //       index++;
+  //   //     }
+  //   //   });
+  //   // } catch (e) {
+  //   //   print('e>>>${e.toString()}');
+  //   // }
+  //   // });
+  // }
 
   // Widget createWidget(DocumentSnapshot products) => GestureDetector(
   //       onTap: () async {
@@ -285,21 +289,46 @@ class _ProductPageState extends State<ProductPage> {
     //     amountListView = amountListView + 4;
     //   }
     // });
-    getDocuments();
-    scrollController.addListener(() {
+    // listDocument.clear();
+    // getDocuments();  //error 10 ชม**  สาดดดด
+    scrollController.addListener(() { //continue  , looking
       if (scrollController.position.atEdge) {
+
+        print('####scrollController.position.pixels/outter==>${scrollController.position.pixels}');
         if (scrollController.position.pixels == 0) {
-          print('####ListView scroll at top');
+          print('####scrollController.position.pixels/0==>${scrollController.position.pixels}');
           setState(() {
             showButton = false;
           });
-        } else {
-          print('####Listview scroll at bottom');
+          // getDocumentsPrevious(); //work
+        // } else if(scrollController.position.maxScrollExtent - scrollController.position.pixels <= 50) {
+        //   // print('####Listview scroll at bottom');
+        //   print('####scrollController.position.pixels/next==>${scrollController.position.pixels}');
+          // setState(() {
+          //   showButton = true;
+          // });
+
+        }else{
+
+          getDocumentsNext();
           setState(() {
             showButton = true;
           });
-          getDocumentsNext();
-        }
+          // if(scrollController.position.maxScrollExtent == scrollController.position.pixels ){
+          //
+          //   setState(() {
+          //     isMaxData = true;
+          //   });
+          //   print('####isMaxData>>>$isMaxData');
+          // }else{
+          //   setState(() {
+          //     isMaxData = false;
+          //   });
+          //   print('####isMaxData>>>$isMaxData');
+          // }
+
+
+          }
       }
     });
   }
@@ -389,14 +418,32 @@ class _ProductPageState extends State<ProductPage> {
               padding: const EdgeInsets.only(top: 2, left: 10),
               child: CategoryWidget(
                 onChange: (DocumentSnapshot document) {
-                  //  print('onchange=>>>${document['itemcode']}');
-                  setState(() {
-                    categoryId = document['name'];
+                   print('####document[\'name\']=>>>${document['name']}');
+
+
+                  String  _categoryId = document['name'];
                     // พอตัวนี้เปลี่ยนมันจะไปบังคับให้ตัวอื่นเปลี่ยนตาม
-                  });
-                  getProduct();
-                  listDocument.clear();
+                   setState(() {
+                     categoryId = _categoryId;
+                   });
+
+                  // getProduct();
+
+                   // if (loadingCategory == true) {
+                   //   soldOutAlert("ระบบกำลังโหลดข้อมูล กรุณารอสักครู่!");
+                   //
+                   // } else {
+                   //   setState(() {
+                   //     listDocument.clear();
+                   //     loadingCategory = true;
+                   //   });
+                   //   getDocuments2(_categoryId);
+                   //
+                   // }
+
                   getDocuments();
+
+
 
                   // print('document>>>${document['name']}');
                 },
@@ -404,9 +451,10 @@ class _ProductPageState extends State<ProductPage> {
               height: 90,
               color: Colors.white,
             ),
-            listDocument.isNotEmpty
-                ? RefreshIndicator(
-                    child: ListView.builder(
+            // listDocument.isNotEmpty
+            //     ? RefreshIndicator(
+            //         child:
+                    ListView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
                       // scrollDirection: Axis.vertical,
@@ -448,12 +496,11 @@ class _ProductPageState extends State<ProductPage> {
                                   // }
                                   // print('#####doc.documentId>>>${doc.documentId}');
                                   if (uid == 'user') {
-                                    Navigator.of(context).pushNamed('/authen');
-                                  } else
-                                    if (_isHoldPurchase == true) {
-                                      //show notify
-                                      soldOutAlert();
-                                    }  else {
+                                    Navigator.of(context).pushNamed('/authen2');
+                                  } else if (_isHoldPurchase == true) {
+                                    //show notify
+                                    soldOutAlert("สินค้าหมดชั่วคราว!");
+                                  } else {
                                     late QuerySnapshot snapshot;
                                     try {
                                       snapshot = await FirebaseFirestore
@@ -461,15 +508,14 @@ class _ProductPageState extends State<ProductPage> {
                                           .collection('wawastore')
                                           .doc('wawastore')
                                           .collection('product2')
-                                          .where('name',
-                                              isEqualTo: doc.name)
+                                          .where('name', isEqualTo: doc.name)
                                           .get();
                                       String _id = snapshot.docs[0].id;
                                       print('#####doc.documentId/_id>>>$_id');
                                     } on Exception catch (e) {
                                       // TODO
                                     }
-                                    String res = await Navigator.of(context)
+                                    String? res = await Navigator.of(context)
                                         .push(MaterialPageRoute(
                                       builder: (context) => ChooseProduct(
                                         products: snapshot.docs[0],
@@ -478,65 +524,82 @@ class _ProductPageState extends State<ProductPage> {
                                     ));
                                     if (res == 'save') {
                                       widget.onAdItem();
+                                      getDocumentsPrevious();
                                       print('###res>>>${res.toString()}');
                                     }
                                   }
                                 },
                                 child:
                                     // Image.network('${product['urlImage']}',width: screen * 0.6, height: 150),
-                                _isHoldPurchase  ? Stack(
-                              children: [
-                              ProductItemBox(
-                              imageurl: doc.url,
-                                  width: screen * 0.6,
-                                  height: 150),
-                              Image.asset(
-                                'images/sold_out.png',
-                                width: screen * 0.6,
-                                height: 150,
-                              )
-                            ],
-                          )
-                              : _inCart
-                          ? Stack(
-                          children: [
-                          ProductItemBox(
-                          imageurl: doc.url,
-                          width: screen * 0.6,
-                          height: 150),
-                          Image.asset(
-                          'images/incarted.png',
-                          width: screen * 0.6,
-                          height: 150,
-                          ),
-                          Positioned(
-                          left: 8,
-                          bottom: 10,
-                          right: 8,
-                          child: Wrap(
-                          children: [
-                          Text(
-                          doc.qtyInCart,
-                          style: const TextStyle(
-                          backgroundColor: Colors.red,
-                          fontWeight:
-                          FontWeight
-                              .bold,
-                          fontSize: 20,
-                          color: Colors
-                              .white),
-                          )
-                          ],
-                          ),
-                          ),
-                          ],
-                          )
-                              :
+                                    _isHoldPurchase
+                                        ? Stack(
+                                            children: [
+                                              ProductItemBox(
+                                                  imageurl: doc.url,
+                                                  width: screen * 0.6,
+                                                  height: 150),
+                                              Image.asset(
+                                                'images/sold_out.png',
+                                                width: screen * 0.6,
+                                                height: 150,
+                                              )
+                                            ],
+                                          )
+                                        : _inCart
+                                            ? Stack(
+                                                children: [
+                                                  ProductItemBox(
+                                                      imageurl: doc.url,
+                                                      width: screen * 0.6,
+                                                    height: 150,
+                                                     ),
 
-                                    ProductItemBox(
-                                        imageurl: doc.url,
-                                        width: screen * 0.6,
-                                        height: 150),
+                                                  Positioned(
+                                                    left: 0,
+                                                    bottom: 0,
+                                                    right: 0,
+                                                    child:
+                                                    Container(
+                                                     padding: const EdgeInsets.all(8),
+                                                      decoration:  BoxDecoration(
+                                                        color: Colors.orange.shade300,
+                                                        borderRadius: BorderRadius.circular(12),
+                                                      ),
+
+                                                      child: Wrap(
+                                                        children: [
+                                                          Text(
+                                                            '***มีสินค้าในตะกร้าแล้ว!  ${doc.qtyInCart}',
+                                                            style:  TextStyle(
+                                                                // backgroundColor:
+                                                                //     Colors.red,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontSize: 20,
+                                                                color:
+                                                                    Colors.red.shade700),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Positioned(
+                                                    top: 0,
+                                                    left: 10,
+                                                    right: 10,
+                                                    child: Image.asset(
+                                                      'images/inCart2.png',
+                                                      width: screen * 0.05,
+                                                      // height: 60,
+                                                    ),
+                                                  ),
+                                                ],
+                                              )
+                                            : ProductItemBox(
+                                                imageurl: doc.url,
+                                                width: screen * 0.6,
+                                                height: 150),
                               ),
                               // SizedBox(height: 10,),
                               AutoSizeText(
@@ -637,31 +700,40 @@ class _ProductPageState extends State<ProductPage> {
 
                       //  }
                     ),
-                    onRefresh: getDocuments)
-                : const CircularProgressIndicator(),
-            const SizedBox(
-              height: 30,
-            ),
-            ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    primary: const Color(0xff464747),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30))),
-                onPressed: () {
-                  getDocumentsNext();
-                },
-                child: const Text('แสดงเพิ่มเติม'))
+                //     onRefresh: getDocuments)
+                // : const CircularProgressIndicator(),
+            // const SizedBox(
+            //   height: 30,
+            // ),
+            // isMaxData ?  Container() :
+            // ElevatedButton(
+            //     style: ElevatedButton.styleFrom(
+            //         backgroundColor: Colors.redAccent,
+            //         shape: RoundedRectangleBorder(
+            //             borderRadius: BorderRadius.circular(30))),
+            //     onPressed: () {
+            //       getDocumentsNext();
+            //     },
+            //     child: const Text('กำลังโหลดเพิ่ม',style: TextStyle(fontSize: 20,color: Colors.white,fontWeight: FontWeight.bold),
+    //               ),
+    // ),
           ],
         ),
       ),
     );
   }
 
-
-
   Future<void> getDocuments() async {
-    listDocument = [];
-    Query<Map<String, dynamic>> collection = FirebaseFirestore.instance
+    setState(() {
+      listDocument.clear();
+      loadingCategory = true;
+    });
+
+    Query<Map<String, dynamic>> collection ;
+
+    print('####listDocument/getDocuments() >>${listDocument.length}');
+    print('####categoryId/getDocuments() >>$categoryId');
+     collection = FirebaseFirestore.instance
         .collection('wawastore')
         .doc('wawastore')
         .collection('product2')
@@ -676,10 +748,59 @@ class _ProductPageState extends State<ProductPage> {
 
     fetchDocuments(collection);
   }
+  // Future<void> getDocuments2() async {
+  //
+  //   Query<Map<String, dynamic>> collection ;
+  //
+  //   print('####listDocument/getDocuments() >>${listDocument.length}');
+  //   print('####categoryId/getDocuments() >>$categoryId');
+  //   collection = FirebaseFirestore.instance
+  //       .collection('wawastore')
+  //       .doc('wawastore')
+  //       .collection('product2')
+  //       .where('categoryName', isEqualTo: categoryId)
+  //   // .where('isHoldSale', isEqualTo: false)
+  //   // .where('isHoldPurchase', isEqualTo: false)
+  //       .orderBy('brandName')
+  //       .orderBy('groupMainName')
+  //       .limit(50);
+  //
+  //   // print('####collection>>>$collection');
+  //
+  //   fetchDocuments3(collection);
+  // }
+
+  Future<void> getDocumentsPrevious() async {
+    setState(() {
+      listDocument.clear();
+      loadingCategory = true;
+    });
+
+    var lastVisible = collectionState.docs[collectionState.docs.length - 1];
+    print('####collectionState legnth/ getDocumentsPrevious is Worked!!! === ${collectionState.size} /endBeforeDocument=== $lastVisible');
+    var collection = FirebaseFirestore.instance
+        .collection('wawastore')
+        .doc('wawastore')
+        .collection('product2')
+        .where('categoryName', isEqualTo: categoryId)
+    // .where('isHoldSale', isEqualTo: false)
+    // .where('isHoldPurchase', isEqualTo: false)
+        .orderBy('brandName')
+        .orderBy('groupMainName')
+    .endBeforeDocument(lastVisible); //***worked!
+
+        // .startAfterDocument(lastVisible)
+        // .limit(20);
+    fetchDocuments(collection); //ยัดข้อมูลเข้า models
+  }
 
   Future<void> getDocumentsNext() async {
+    setState(() {
+
+      loadingCategory = true;
+    });
     var lastVisible = collectionState.docs[collectionState.docs.length - 1];
-    print('listDocument legnth: ${collectionState.size} last: $lastVisible');
+    print('####collectionState legnth === ${collectionState.size} /startAfterDocument=== $lastVisible');
     var collection = FirebaseFirestore.instance
         .collection('wawastore')
         .doc('wawastore')
@@ -689,121 +810,69 @@ class _ProductPageState extends State<ProductPage> {
         // .where('isHoldPurchase', isEqualTo: false)
         .orderBy('brandName')
         .orderBy('groupMainName')
+
         .startAfterDocument(lastVisible)
         .limit(30);
-    fetchDocuments(collection);
+    fetchDocuments(collection); //ยัดข้อมูลเข้า models
+    // _onTop();
   }
 
-                        Future<void> soldOutAlert() async {
-            showDialog(
-            barrierDismissible: false,
-            context: context,
-            builder: (context) => SimpleDialog(
-            title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-            Text(
-            'สินค้าหมดชั่วคราว!',
-            style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            // color: Colors.brown[700]
-            ),
-            ),
-            ],
-            ),
-            children: [
-            Padding(
-            padding: const EdgeInsets.only(left: 10, right: 10),
-            child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-            // ElevatedButton.icon(
-            //
-            //   style: ElevatedButton.styleFrom(
-            //     shape: RoundedRectangleBorder(
-            //       borderRadius: BorderRadius.circular(20),
-            //     ),
-            //     backgroundColor: Colors.black,
-            //   ),
-            //
-            //
-            //
-            //
-            //   onPressed: () {
-            //     Navigator.pop(context);
-            //   },
-            //   icon: Icon(
-            //     Icons.clear,
-            //     size: 32,
-            //     color: Colors.white,
-            //   ),
-            //   label: Text(
-            //     'ยกเลิก',
-            //     style: TextStyle(
-            //         fontSize: 18,
-            //         fontWeight: FontWeight.bold,
-            //         color: Colors.white),
-            //   ),
-            //   // style: ElevatedButton.styleFrom(
-            //   //   padding: EdgeInsets.all(12),
-            //   //
-            //   //   backgroundColor: Colors.black,
-            //   //   shape: RoundedRectangleBorder(
-            //   //     borderRadius: BorderRadius.circular(20),
-            //   //   ),
-            //   // ),
-            // ),
-            ElevatedButton.icon(
-            onPressed: () {
-            Navigator.of(context).pop(true);
-            // setState(() {
-            //   btnSave = !btnSave;
-            // });
-
-            // sendDataToSML(context);
-            // if (lat1 == 0) {
-            //   normalDialog(context, 'แอพต้องการตำแหน่งปัจจุบัน',
-            //       'คุณต้องอนุญาตให้แอปใช้ตำแหน่งก่อนสั่งซื้อครับ');
-            // } else {
-            //   // normalDialog(
-            //   //     context, 'OK', 'ระยะที่ได้ คือ$distance');
-
-            // }
-            },
-            icon: const Icon(Icons.check,
-            size: 32, color: Colors.white),
-            label: const Text(
-            'ตกลง',
-            style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white),
-            ),
-            // style: ElevatedButton.styleFrom(
-            //   padding: EdgeInsets.all(12),
-            //   backgroundColor: Colors.deepOrangeAccent,
-            //   shape: RoundedRectangleBorder(
-            //     borderRadius: BorderRadius.circular(20),
-            //   ),
-            // ),
-            style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            ),
-            backgroundColor: Colors.deepOrangeAccent,
-            ),
-            ),
-            ],
-            ),
-            )
-            ],
+  Future<void> soldOutAlert(String msg) async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) => SimpleDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children:  [
+                  Text(
+                    msg,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 10, right: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).pop(true);
+                        },
+                        icon: const Icon(Icons.check,
+                            size: 32, color: Colors.white),
+                        label: const Text(
+                          'ตกลง',
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          backgroundColor: Colors.deepOrangeAccent,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
             ));
-            }
+  }
 
   fetchDocuments(Query<Map<String, dynamic>> collection) {
     collection.get().then((value) async {
       collectionState = value;
+      // setState(() {
+      //   listDocument.clear(); //แก้สะสมได้มั้ย === แก้ได้แต่โหลดใหม่ตลอด // ผลเสียมากกว่าได้
+      // });
 
       // value.docs.forEach((element) {
       //   print('#####element.data()>>>${element.data()}');
@@ -886,7 +955,7 @@ class _ProductPageState extends State<ProductPage> {
               String _qtyInCartStr = "";
               for (var item1 in value.docs) {
                 _qtyInCartStr =
-                'หน่วย: ${item1['unit']} จำนวน:# ${item1['amount']} ';
+                    'หน่วย: ${item1['unit']} จำนวน:# ${item1['amount']} ';
 
                 qtyInCartList.add(_qtyInCartStr);
               }
@@ -914,10 +983,256 @@ class _ProductPageState extends State<ProductPage> {
         });
       }
 
+      setState(() {
+        loadingCategory = false;
+      });
 
-      // print('#####elistDocument listDocument>>>${listDocument.length}');
+      print('#####listDocument.length===>>>${listDocument.length}');
     });
   }
+  // fetchDocuments3(Query<Map<String, dynamic>> collection) {
+  //   collection.get().then((value) async {
+  //     collectionState = value;
+  //     // setState(() {
+  //     //   listDocument.clear(); //แก้สะสมได้มั้ย === แก้ได้แต่โหลดใหม่ตลอด // ผลเสียมากกว่าได้
+  //     // });
+  //
+  //     // value.docs.forEach((element) {
+  //     //   print('#####element.data()>>>${element.data()}');
+  //     //   setState(() {
+  //     //     listDocument.add(DocObj.setDetails(element.data()));
+  //     //   });
+  //     // });
+  //     //
+  //     for (var item in value.docs) {
+  //       // value.docs.forEach((element) {
+  //       //  // print('#####element.data()>>>${element.data()}');
+  //       //  // setState(() {
+  //       //     // listDocument.add(DocObj.setDetails(element.data()));
+  //       //  // });
+  //       //   listDocument.add({
+  //       //     "documentName" : element.data()["name"],
+  //       //     "documentUrl" : element.data()["name"]
+  //       //
+  //       //
+  //       //   // documentName = doc['name'];
+  //       //   // documentUrl = doc['urlImage'];
+  //       //   // documentId = doc['id'];
+  //       //   // isHoldPurchase = doc['isHoldPurchase'];
+  //       //
+  //       //   });
+  //
+  //       // });
+  //       // DocObj model = DocObj.setDetails(item.data());
+  //       // bool valueCart = false;
+  //       // await FirebaseFirestore.instance
+  //       //     .collection('wawastore')
+  //       //     .doc('wawastore')
+  //       //     .collection('inCart')
+  //       //     .where('name',isEqualTo: item['name'])
+  //       //     .get().then((value) {
+  //       //   if (value.docs.isNotEmpty) {
+  //       //
+  //       //     setState(() {
+  //       //       valueCart = true;
+  //       //     });
+  //       //   }else{
+  //       //     setState(() {
+  //       //       valueCart = false;
+  //       //     });
+  //       //   }
+  //       //
+  //       //
+  //       //
+  //       // });
+  //       // await FirebaseFirestore.instance
+  //       //     .collection('wawastore')
+  //       //     .doc('wawastore')
+  //       //     .collection('inCart')
+  //       //     .add({
+  //       // "code" : code,
+  //       // "name" : name,
+  //       // "price" : prices,
+  //       // "unit": unitcodes,
+  //       // "amount": listAmounts,
+  //       // "subtotal": listSubtotals,
+  //       // "uid":uid
+  //       // String uid = 'user';
+  //       bool _inCart = false;
+  //       String _qtyInCart = "";
+  //
+  //       if (uid != 'user') {
+  //         await FirebaseFirestore.instance
+  //             .collection('wawastore')
+  //             .doc('wawastore')
+  //             .collection('inCart')
+  //             .where('name', isEqualTo: item['name'])
+  //             .where('uid', isEqualTo: uid)
+  //             .get()
+  //             .then((value) {
+  //           if (value.docs.isNotEmpty) {
+  //             setState(() {
+  //               _inCart = true;
+  //             });
+  //             List<String> qtyInCartList = [];
+  //             String _qtyInCartStr = "";
+  //             for (var item1 in value.docs) {
+  //               _qtyInCartStr =
+  //               'หน่วย: ${item1['unit']} จำนวน:# ${item1['amount']} ';
+  //
+  //               qtyInCartList.add(_qtyInCartStr);
+  //             }
+  //
+  //             setState(() {
+  //               _qtyInCart = qtyInCartList.toString();
+  //             });
+  //           }
+  //         });
+  //       }
+  //       // print('####item[\'name\']===${item['name']}');
+  //       // print('####_inCart===$_inCart');
+  //       // print('####_qtyInCart===$_qtyInCart');
+  //
+  //       DocObjModel model = DocObjModel.fromMap({
+  //         "name": item['name'],
+  //         "url": item['urlImage'],
+  //         "id": item.id,
+  //         "isHoldPurchase": item['isHoldPurchase'],
+  //         "inCart": _inCart, //worked***
+  //         "qtyInCart": _qtyInCart, //worked***
+  //       });
+  //       setState(() {
+  //         listDocument.add(model);
+  //       });
+  //     }
+  //
+  //     setState(() {
+  //       // listDocument.clear();
+  //       loadingCategory = false;
+  //     });
+  //
+  //     print('#####listDocument.length/fetchDocuments3===>>>${listDocument.length}');
+  //   });
+  // }
+  // fetchDocuments2(Query<Map<String, dynamic>> collection) {
+  //   collection.get().then((value) async {
+  //     collectionState = value;
+  //     // setState(() {
+  //     //   listDocument.clear(); //แก้สะสมได้มั้ย === แก้ได้แต่โหลดใหม่ตลอด // ผลเสียมากกว่าได้
+  //     // });
+  //
+  //     // value.docs.forEach((element) {
+  //     //   print('#####element.data()>>>${element.data()}');
+  //     //   setState(() {
+  //     //     listDocument.add(DocObj.setDetails(element.data()));
+  //     //   });
+  //     // });
+  //     //
+  //     for (var item in value.docs) {
+  //       // value.docs.forEach((element) {
+  //       //  // print('#####element.data()>>>${element.data()}');
+  //       //  // setState(() {
+  //       //     // listDocument.add(DocObj.setDetails(element.data()));
+  //       //  // });
+  //       //   listDocument.add({
+  //       //     "documentName" : element.data()["name"],
+  //       //     "documentUrl" : element.data()["name"]
+  //       //
+  //       //
+  //       //   // documentName = doc['name'];
+  //       //   // documentUrl = doc['urlImage'];
+  //       //   // documentId = doc['id'];
+  //       //   // isHoldPurchase = doc['isHoldPurchase'];
+  //       //
+  //       //   });
+  //
+  //       // });
+  //       // DocObj model = DocObj.setDetails(item.data());
+  //       // bool valueCart = false;
+  //       // await FirebaseFirestore.instance
+  //       //     .collection('wawastore')
+  //       //     .doc('wawastore')
+  //       //     .collection('inCart')
+  //       //     .where('name',isEqualTo: item['name'])
+  //       //     .get().then((value) {
+  //       //   if (value.docs.isNotEmpty) {
+  //       //
+  //       //     setState(() {
+  //       //       valueCart = true;
+  //       //     });
+  //       //   }else{
+  //       //     setState(() {
+  //       //       valueCart = false;
+  //       //     });
+  //       //   }
+  //       //
+  //       //
+  //       //
+  //       // });
+  //       // await FirebaseFirestore.instance
+  //       //     .collection('wawastore')
+  //       //     .doc('wawastore')
+  //       //     .collection('inCart')
+  //       //     .add({
+  //       // "code" : code,
+  //       // "name" : name,
+  //       // "price" : prices,
+  //       // "unit": unitcodes,
+  //       // "amount": listAmounts,
+  //       // "subtotal": listSubtotals,
+  //       // "uid":uid
+  //       // String uid = 'user';
+  //       bool _inCart = false;
+  //       String _qtyInCart = "";
+  //
+  //       if (uid != 'user') {
+  //         await FirebaseFirestore.instance
+  //             .collection('wawastore')
+  //             .doc('wawastore')
+  //             .collection('inCart')
+  //             .where('name', isEqualTo: item['name'])
+  //             .where('uid', isEqualTo: uid)
+  //             .get()
+  //             .then((value) {
+  //           if (value.docs.isNotEmpty) {
+  //             setState(() {
+  //               _inCart = true;
+  //             });
+  //             List<String> qtyInCartList = [];
+  //             String _qtyInCartStr = "";
+  //             for (var item1 in value.docs) {
+  //               _qtyInCartStr =
+  //               'หน่วย: ${item1['unit']} จำนวน:# ${item1['amount']} ';
+  //
+  //               qtyInCartList.add(_qtyInCartStr);
+  //             }
+  //
+  //             setState(() {
+  //               _qtyInCart = qtyInCartList.toString();
+  //             });
+  //           }
+  //         });
+  //       }
+  //       // print('####item[\'name\']===${item['name']}');
+  //       // print('####_inCart===$_inCart');
+  //       // print('####_qtyInCart===$_qtyInCart');
+  //
+  //       DocObjModel model = DocObjModel.fromMap({
+  //         "name": item['name'],
+  //         "url": item['urlImage'],
+  //         "id": item.id,
+  //         "isHoldPurchase": item['isHoldPurchase'],
+  //         "inCart": _inCart, //worked***
+  //         "qtyInCart": _qtyInCart, //worked***
+  //       });
+  //       setState(() {
+  //         listDocument.add(model);
+  //       });
+  //     }
+  //
+  //     print('#####listDocument.length/fetchDocuments2===>>>${listDocument.length}');
+  //   });
+  // }
 
   // Widget buildCard(int index) => Container(
   //   width:screen *0.45 ,

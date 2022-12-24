@@ -1,0 +1,760 @@
+import 'dart:convert';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:liquid_progress_indicator/liquid_progress_indicator.dart';
+import 'package:wawa/models/sync_cus_model.dart';
+
+class SyncCustomers extends StatefulWidget {
+  const SyncCustomers({Key? key}) : super(key: key);
+
+  @override
+  State<SyncCustomers> createState() => _SyncCustomersState();
+}
+
+class _SyncCustomersState extends State<SyncCustomers> {
+  bool loading = false;
+  int minPage = 1; //1
+  int maxPage = 1800; //
+  int pSize = 1; //100
+  int noMax = 0;
+  double uploadPer = 0;
+  double _percent = 0;
+  var myFormat = NumberFormat('#,##0.0', 'en_US');
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    syncData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.grey,
+          title: const Text('อัพเดทบัญชีลูกหนี้'),
+        ),
+        body: Column(
+          //  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            _AnimatedLiquidCircularProgressIndicator(percentUpload: uploadPer),
+            const SizedBox(height: 30,),
+
+            Row(mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('${myFormat.format(_percent)}%',style: const TextStyle(fontSize: 30,fontWeight: FontWeight.w700,color: Colors.red),),
+              ],
+            ),
+
+            const SizedBox(height: 50,),
+
+            // RaisedButton.icon(color: Colors.grey,
+            //
+            //     onPressed: () async {
+            //   Navigator.of(context).pop();
+            //   // await helper.setStorage('numm', numm.toString());
+            // }, icon: const Icon(Icons.save_sharp,size: 32,color: Colors.white,), label: const Text('พักการอัพเดทชั่วคราว',style: TextStyle(fontSize: 24,color: Colors.white,fontWeight: FontWeight.w700),)),
+            //
+            // const SizedBox(height: 50,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                SizedBox(
+                  width: 75,
+                  height: 75,
+                  child: LiquidCircularProgressIndicator(
+                    backgroundColor: Colors.black,
+                    valueColor: const AlwaysStoppedAnimation(Colors.red),
+                  ),
+                ),
+                SizedBox(
+                  width: 75,
+                  height: 75,
+                  child: LiquidCircularProgressIndicator(
+                    backgroundColor: Colors.white,
+                    valueColor: const AlwaysStoppedAnimation(Colors.pink),
+                    borderColor: Colors.red,
+                    borderWidth: 5.0,
+                    direction: Axis.horizontal,
+                  ),
+                ),
+                SizedBox(
+                  width: 75,
+                  height: 75,
+                  child: LiquidCircularProgressIndicator(
+                    backgroundColor: Colors.white,
+                    valueColor: const AlwaysStoppedAnimation(Colors.grey),
+                    borderColor: Colors.blue,
+                    borderWidth: 5.0,
+                    center: const Text(
+                      "Loading...",
+                      style: TextStyle(
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 75,
+                  height: 75,
+                  child: LiquidCircularProgressIndicator(
+                    backgroundColor: Colors.lightGreen,
+                    valueColor: const AlwaysStoppedAnimation(Colors.blueGrey),
+                    direction: Axis.horizontal,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+
+    );
+  }
+
+  Future<void> syncData() async {
+    setState(() {
+      loading = true;
+    });
+    for (var page = minPage; page <= maxPage; page++) {
+      String path =
+          'http://43.229.149.11:8086/SMLJavaRESTService/v3/api/customer?page=$page&size=1';
+
+      Map<String, String> headers = {};
+      headers['GUID'] = 'smlx';
+      headers['provider'] = 'DATA';
+      headers['databasename'] = 'wawa2';
+      headers['configFileName'] = 'SMLConfigDATA.xml';
+
+      // try {
+      await Dio()
+          .get(path, options: Options(headers: headers))
+          .then((value) async {
+        // พัก data ได้ไม่จำกัด สุดยอด**
+        // print('####value===${value.data}'); //worked
+        print('####value.data[\'data\'][0][\'code\']===>> ${value.data['data'][0]['code']}');
+        String? _code  = value.data['data'][0]['code'];
+        String? _name = value.data['data'][0]['name'];
+        int _status = value.data['data'][0]['status'] ?? 0;
+        int _price_level = value.data['data'][0]['price_level'] ?? 0;
+
+        var collection = FirebaseFirestore.instance
+            .collection('wawastore')
+            .doc('wawastore')
+            .collection('customerCols')
+            .where('code', isEqualTo: value.data['data'][0]['code']);
+
+        var snapshots = await collection.get();
+        for (var doc in snapshots.docs) {
+          await doc.reference.delete(); //for loop delete in firebase
+        }
+
+        //insert***
+        FirebaseFirestore.instance
+            .collection('wawastore')
+            .doc('wawastore')
+            .collection('customerCols')
+            .add({
+          "code": value.data['data'][0]['code'],
+          "name": value.data['data'][0]['name'],
+          "priceLevel": value.data['data'][0]['price_level'],
+          "status": value.data['data'][0]['status']
+        });
+      });
+      setState(() {
+
+        noMax = page;
+      });
+      double _v = noMax*100/maxPage;
+      double _v2 = noMax * 0.5 / maxPage;
+      setState(() {
+        uploadPer = _v2;
+        _percent = _v;
+      });
+
+    }//end for
+
+    // double _numm = numm.toDouble();
+    // num _nummax = listProducts.length;
+    // double _nummax = numx.toDouble();
+    // double _v = _numm/_nummax;
+
+
+  }
+}
+
+class _AnimatedLiquidCircularProgressIndicator extends StatefulWidget {
+  final double percentUpload;
+  const _AnimatedLiquidCircularProgressIndicator({required this.percentUpload});
+
+  @override
+  State<StatefulWidget> createState() =>
+      _AnimatedLiquidCircularProgressIndicatorState();
+}
+
+class _AnimatedLiquidCircularProgressIndicatorState
+    extends State<_AnimatedLiquidCircularProgressIndicator>
+    with SingleTickerProviderStateMixin {
+  AnimationController? _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 10),
+    );
+
+    _animationController!.addListener(() => setState(() {}));
+    _animationController!.repeat();
+  }
+
+  @override
+  void dispose() {
+    _animationController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final percentage = _animationController!.value * 100;
+    return Center(
+      child: SizedBox(
+        width: 150.0,
+        height: 150.0,
+        child: LiquidCircularProgressIndicator(
+          value: widget.percentUpload,
+          backgroundColor: Colors.white,
+          valueColor: const AlwaysStoppedAnimation(Colors.blue),
+          center: Text(
+            "${percentage.toStringAsFixed(0)}%",
+            style: const TextStyle(
+              color: Colors.lightBlueAccent,
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+//end
+
+    //   Padding(
+    //     padding: const EdgeInsets.symmetric(horizontal: 30),
+    //     child: LiquidLinearProgressIndicator(
+    //     value: _value, // Defaults to 0.5.
+    //     valueColor: AlwaysStoppedAnimation(Colors.pink), // Defaults to the current Theme's accentColor.
+    //     backgroundColor: Colors.white, // Defaults to the current Theme's backgroundColor.
+    //     borderColor: Colors.red,
+    //     borderWidth: 5.0,
+    //     borderRadius: 12.0,
+    //     direction: Axis.vertical, // The direction the liquid moves (Axis.vertical = bottom to top, Axis.horizontal = left to right). Defaults to Axis.horizontal.
+    //     center: Text("Loading...$numm/$numx"),
+    // ),
+    //   )
+
+
+
+
+
+
+    // Padding(
+    //   padding: const EdgeInsets.only(left: 15, right: 15),
+    //   child: TextFormField(
+    //     style: TextStyle(
+    //         fontSize: 28,
+    //         fontWeight: FontWeight.bold,
+    //         color: Colors.greenAccent[700]),
+    //     validator: (value) {
+    //       if (value.isEmpty) {
+    //         return 'min value ';
+    //       }
+    //       return null;
+    //     },
+    //     controller: ctrlMin,
+    //     decoration: InputDecoration(
+    //         labelText: 'min value',
+    //         labelStyle: TextStyle(
+    //             fontWeight: FontWeight.bold,
+    //             color: Colors.green[700]),
+    //         helperText: 'min value',
+    //         helperStyle: TextStyle(
+    //             fontWeight: FontWeight.bold,
+    //             color: Colors.green[300]),
+    //         prefixIcon: Icon(
+    //           Icons.edit,
+    //           color: Colors.green[700],
+    //           size: 32,
+    //         )),
+    //   ),
+    // ),
+
+    // Padding(
+    //   padding: const EdgeInsets.only(left: 15, right: 15),
+    //   child: TextFormField(
+    //     style: TextStyle(
+    //         fontSize: 28,
+    //         fontWeight: FontWeight.bold,
+    //         color: Colors.greenAccent[700]),
+    //     validator: (value) {
+    //       if (value.isEmpty) {
+    //         return 'max value ';
+    //       }
+    //       return null;
+    //     },
+    //     controller: ctrlMax,
+    //     decoration: InputDecoration(
+    //         labelText: 'max value',
+    //         labelStyle: TextStyle(
+    //             fontWeight: FontWeight.bold,
+    //             color: Colors.green[700]),
+    //         helperText: 'max value',
+    //         helperStyle: TextStyle(
+    //             fontWeight: FontWeight.bold,
+    //             color: Colors.green[300]),
+    //         prefixIcon: Icon(
+    //           Icons.edit,
+    //           color: Colors.green[700],
+    //           size: 32,
+    //         )),
+    //   ),
+    // ),
+    // SizedBox(
+    //   height: 20,
+    // ),
+    // Padding(
+    //   padding: const EdgeInsets.all(8.0),
+    //   child: Row(
+    //     mainAxisAlignment: MainAxisAlignment.center,
+    //     children: [
+    //       Container(
+    //         width: 200,
+    //         height: 80,
+    //         child: Padding(
+    //           padding: const EdgeInsets.all(8.0),
+    //           child: ElevatedButton(
+    //               onPressed: () {
+    //                 if (_formKey.currentState.validate()) {
+    //                   //valid
+    //                   freshDataByCategory(int.parse(ctrlMin.text),
+    //                       int.parse(ctrlMax.text));
+    //                 } else {
+    //                   //invalid
+    //                 }
+    //               },
+    //               child: Text(
+    //                 'Sync Data',
+    //                 style: TextStyle(
+    //                     fontWeight: FontWeight.bold, fontSize: 24),
+    //               )),
+    //         ),
+    //       ),
+    //     ],
+    //   ),
+    // ),
+    // Padding(
+    //   padding: const EdgeInsets.all(8.0),
+    //   child: Row(
+    //     mainAxisAlignment: MainAxisAlignment.center,
+    //     children: [
+    //       Container(
+    //         width: 200,
+    //         height: 80,
+    //         child: Padding(
+    //           padding: const EdgeInsets.all(8.0),
+    //           child: ElevatedButton(
+    //               onPressed: () {
+    //                 // genNumber();
+    //                // getPremium();
+    //               },
+    //               child: Text(
+    //                 'Get top ten',
+    //                 style: TextStyle(
+    //                     fontWeight: FontWeight.bold, fontSize: 24),
+    //               )),
+    //         ),
+    //       ),
+    //     ],
+    //   ),
+    // ),
+    // Padding(
+    //   padding: const EdgeInsets.all(8.0),
+    //   child: Row(
+    //     mainAxisAlignment: MainAxisAlignment.center,
+    //     children: [
+    //       Container(
+    //         width: 200,
+    //         height: 80,
+    //         child: Padding(
+    //           padding: const EdgeInsets.all(8.0),
+    //           child: ElevatedButton(
+    //               onPressed: () {
+    //                 checkTure(ctrlMin.text);
+    //               },
+    //               child: Text(
+    //                 'Check True',
+    //                 style: TextStyle(
+    //                     fontWeight: FontWeight.bold, fontSize: 24),
+    //               )),
+    //         ),
+    //       ),
+    //     ],
+    //   ),
+    // ),
+    // Padding(
+    //   padding: const EdgeInsets.all(8.0),
+    //   child: Row(
+    //     mainAxisAlignment: MainAxisAlignment.center,
+    //     children: [
+    //       Container(
+    //         width: 200,
+    //         height: 80,
+    //         child: Padding(
+    //           padding: const EdgeInsets.all(8.0),
+    //           child: ElevatedButton(
+    //               onPressed: () {
+    //                 checkFalse(ctrlMin.text);
+    //               },
+    //               child: Text(
+    //                 'Check False',
+    //                 style: TextStyle(
+    //                     fontWeight: FontWeight.bold, fontSize: 24),
+    //               )),
+    //         ),
+    //       ),
+    //     ],
+    //   ),
+    // ),
+    // SizedBox(
+    //   height: 20,
+    // ),
+    //             ],
+    //           ),
+    //         )),
+    //   );
+  }
+
+// Future<Null> getPremium() async {
+//   //double _totalPre = 0;
+//
+//   QuerySnapshot qsPre = await dbRef
+//       .collection('wawastore')
+//       .doc('wawastore')
+//       .collection('product2')
+//       .get();
+//
+//   if (qsPre.docs.length > 0) {
+//     double num0 = 0;
+//
+//     for (var item in qsPre.docs) {
+//       // 1 = 1
+//       String _code = item.id;
+//       print('####code>>$_code');
+//       QuerySnapshot qsPurchase = await dbRef
+//           .collection('wawastore')
+//           .doc('wawastore')
+//           .collection('purchase')
+//           .where('_code')
+//           .get();
+//
+//       if (qsPurchase.docs.length > 0) {
+//         double num = 0;
+//
+//         for (var item2 in qsPurchase.docs) {
+//           setState(() {
+//             num = num + double.parse(item2['subtotal']);
+//           });
+//           print('#####num>>>$num');
+//         }
+//       }
+//       await dbRef
+//           .collection('wawastore')
+//           .doc('wawastore')
+//           .collection('priceBuy')
+//           .add({
+//         "code": _code,
+//         "name": qsPurchase.docs[0]['name'],
+//         "picturl": qsPurchase.docs[0]['picturl'],
+//         "subtotal": num,
+//       });
+//     }
+//
+//     //create
+//
+//   }
+// }
+}
+
+// print('####value>>>${value.data}');
+// final json = "[" + response.body + "]";
+// if (response.statusCode == 200) {
+//   print("IF responde==200");
+//  for (var item in response.data){
+//    print('####code==${item['data']['code']}');
+//  }
+// print('####response.data>>>${response.data}'); //worked
+
+// final json = response;
+// print("IF rjson");
+// Map<String, dynamic> map= jsonDecode(response.data) ;
+// print('####map>>>${map.toString()}');
+
+// print("IF converting json");
+// final local = Localizacao.fromJson(map);
+// print("IF mapping list");
+// return Response(true, msg: "OK", result: local);
+//   } else {
+//     // return Response(false, msg: "Erro ao conectar no web service");
+//   }
+// } catch (e) {
+// print("error in getLocalizacao: $e");
+// // return Response(false, msg: "Erro ao conectar no web service");
+// }
+
+// for(var item in value.data){
+//   print('####code>>>${item['data']['code']}');
+//
+// }
+
+//           for (var item in value.data) { //***value = objects x100;
+// //delete***
+//
+//           print('####code>>>${item['data']['code']}');
+//           print('####name>>>${item['data']['name']}');
+//           print('####price_level>>>${item['data']['price_level']}');
+//
+//             var collection = FirebaseFirestore.instance
+//                 .collection('wawastore')
+//                 .doc('wawastore')
+//                 .collection('customerCols')
+//                 .where('code', isEqualTo: item['data']['code'])
+//
+//             ;
+//
+//             var snapshots = await collection.get();
+//             for (var doc in snapshots.docs) {
+//               await doc.reference.delete(); //for loop delete in firebase
+//             }
+//
+//             //insert***
+//             FirebaseFirestore.instance
+//                 .collection('wawastore')
+//                 .doc('wawastore')
+//                 .collection('customerCols')
+//                 .add({
+//               "code": item['data']['code'],
+//               "name": item['data']['name'],
+//               "priceLevel": item['data']['price_level'],
+//
+//
+//             });
+//           }
+//         });
+//       } on Exception catch (e) {
+//         print(
+//             '####error!!!==${e.toString()}');
+//         // TODO
+//       }
+//     }
+//   }
+// }
+
+// print('value2==>${value.toString()}');
+// var _name = '';
+// if (value2.data['data']['name'] != null || value2.data['data']['brand_name'] != "null") {
+//   _name = value2.data['data']['name'];
+// }
+
+//var _image = value2.data['data']['images'][0]['uri'];
+
+// if (value2.data['data']['price_formulas'] != null) {
+//var priceFormulas = value2.data['data']['price_formulas'];
+//   priceFormulas = value2.data['data']['price_formulas'];
+// }
+// if (priceFormulas.length != 0) {
+//   priceFormulas = value2.data['data']['price_formulas'];
+// //  print('######priceFormulas>>>${priceFormulas.toString()}');
+// }
+
+// //error จะดีกว่า จะได้รู้ว่ารหัสอะไร
+
+// var isPremium = false;
+// // if (value2.data['data']['is_premium'] != null) {
+// setState(() {
+//   isPremium = value2.data['data']['is_premium'];  //default = false
+// });
+// }
+//add 16-6-2021
+// var isHoldSale = false;
+// // if (value2.data['data']['is_hold_sale'] != null) {
+// setState(() {
+//   isHoldSale = value2.data['data']['is_hold_sale'];
+// });
+// }
+
+// var isHoldPurchase = false;
+// // if (value2.data['data']['is_hold_purchase'] != null) {
+// setState(() {
+//   isHoldPurchase = value2.data['data']['is_hold_purchase'];
+// });
+// }
+
+// var brandName = 'zzz';
+// if (value2.data['data']['brand_name'] != null || value2.data['data']['brand_name'] != "null") {
+//   brandName = value2.data['data']['brand_name'];
+// }
+//
+// var groupMainName = 'yyy';
+// if (value2.data['data']['group_main_name'] != null || value2.data['data']['brand_name'] != "null") {
+//   groupMainName = value2.data['data']['group_main_name'];
+// }
+
+// Map<String, dynamic> mapName = {};
+// mapName['name'] = _name;
+// mapName['urlImage'] = _image;
+// mapName['categoryName'] = _categoryName;
+// mapName['itemCategory'] = _itemCategory;
+// mapName['isPremium'] = isPremium;
+// mapName['isHoldSale'] = isHoldSale;
+// mapName['isHoldPurchase'] = isHoldPurchase;
+// mapName['statusOK'] = true;
+// mapName['brandName'] = brandName;
+// mapName['groupMainName'] = groupMainName;
+
+// var collection =   FirebaseFirestore.instance
+//     .collection('wawastore')
+//     .doc('wawastore')
+//     .collection('product2')
+//     .doc(item)
+//     .collection('unit_codes');
+//
+// var snapshots = await collection.get();
+// for (var doc in snapshots.docs){
+//   await doc.reference.delete(); //for loop delete in firebase
+// }
+
+//clear old code  || delete data by code in searchDB mySQL***
+// deleteApi(item, _name, _image , isHoldSale, isHoldPurchase );
+
+// try {
+//   await FirebaseFirestore.instance
+//       .collection('wawastore')
+//       .doc('wawastore')
+//       .collection('product2')
+//       .doc(item)
+//       .set(mapName);
+// } on Exception catch (e) {
+//   print('####e.toString() /product2 + .doc(code) +  .set(mapName) >>>===${e.toString()}');
+//   // TODO
+// }
+//clear all if value != 0;
+
+//   for (var i = 0; i < priceFormulas.length; i++) {
+//     // print('########code ==>>> $item');
+//     // print(
+//     //     '########priceFormulas#$i-[unit_code] ==>>> ${priceFormulas[i]['unit_code']}');
+//     // print(
+//     //     '########priceFormulas#$i-[price_0] ==>>> ${priceFormulas[i]['price_0']}');
+//
+//     try {
+//       await FirebaseFirestore.instance
+//           .collection('wawastore')
+//           .doc('wawastore')
+//           .collection('product2')
+//           .doc(item)
+//           .collection('unit_codes')
+//           .doc(priceFormulas[i]['unit_code'])
+//           .set({
+//         "price0": num.parse(priceFormulas[i]['price_0'].toString()),
+//         "price1": num.parse(priceFormulas[i]['price_1'].toString()),
+//         "price2": num.parse(priceFormulas[i]['price_2'].toString()),
+//         "price3": num.parse(priceFormulas[i]['price_3'].toString()),
+//         "price4": num.parse(priceFormulas[i]['price_4'].toString()),
+//         "price5": num.parse(priceFormulas[i]['price_5'].toString()),
+//         "price6": num.parse(priceFormulas[i]['price_6'].toString()),
+//         "price7": num.parse(priceFormulas[i]['price_7'].toString()),
+//         "price8": num.parse(priceFormulas[i]['price_8'].toString()),
+//         "price9": num.parse(priceFormulas[i]['price_9'].toString()),
+//         "unit_code": priceFormulas[i]['unit_code'],
+//       }).then((value) {
+//         // print('####success!!!.collection(\'product2\'+ .doc(code)+ .collection(\'unit_codes\')+ .doc(priceFormulas[i][\'unit_code\'])  inserted Success!!!)/>>>${priceFormulas[i]['unit_code']}');
+//       });
+//     } on Exception catch (e) {
+//       print('####error!!!collection(\'product2\'+ .doc(code)+ .collection(\'unit_codes\')+ .doc(priceFormulas[i][\'unit_code\'])==${e.toString()}');
+//       // TODO
+//     }
+//     // double _v2 = i*100/priceFormulas.length;
+//     // setState(() {
+//     //   uploadPer = _v2;
+//     // });
+//   } //for
+// });
+// setState(() {
+//   number = number +1;
+//   numm = number;
+// });
+// double _numm = numm.toDouble();
+// num _nummax = listProducts.length;
+// // double _nummax = numx.toDouble();
+// // double _v = _numm/_nummax;
+// double _v = _numm*100/_nummax;
+// double _v2 = _numm * 0.5 / _nummax;
+// setState(() {
+//   uploadPer = _v2;
+//   _percent = _v;
+// });
+
+//  print('######_value>>>$_value'); //
+
+// number++;
+// print('######number>>>$number'); // end.
+
+// }catch(e){
+//   print('####e.toString()>>>==${e.toString()}');
+//
+//   // } on DioError catch (e) {
+//   // print('####error DioError >>>>${e.toString()} ');
+//   // if(number < 400){
+//   //   if(numm <= numx){
+//   //     freshDataByCategory(numm, numx);
+//   //   }
+//   //
+//   //
+//   // }else{
+//   //   // sleepTime20();
+//   //   if(numm <= numx){
+//   //     freshDataByCategory(numm, numx);
+//   //   }
+//   // }
+//   //
+//   // //error
+//   // if (e.response!.statusCode == 404) {
+//   //   print('#####e.response.statusCode>>>${e.response!.statusCode}');
+//   // } else {
+//   //   print('#####e.message>>>${e.message}');
+//   //  // print('#####e.request>>>${e!.request}');
+//   // }
+// }
+// number++;
+// setState(() {
+//   number = number +1;
+//   numm = number;
+// });
+//   double _numm = numm.toDouble();
+//   num _nummax = listProducts.length;
+//   double _v = _numm*100/_nummax;
+//   // double _v2 = _numm * 100 / _nummax;
+//   setState(() {
+//     // uploadPer = _v2;
+//     _percent = _v;
+//   });
+
+//   }// loop for
+//   // });
+//   // });
+// }
+// }

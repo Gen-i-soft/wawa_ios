@@ -41,7 +41,7 @@ class _ChatAdminPageState extends State<ChatAdminPage> {
           .doc(document.id)
           .update({
         "isOpened": true,
-        "openTime": new DateTime.now().millisecondsSinceEpoch
+        "openTime": DateTime.now().millisecondsSinceEpoch
       }).then((value) {});
 
       await dbRef
@@ -75,7 +75,7 @@ class _ChatAdminPageState extends State<ChatAdminPage> {
                 .doc(item.id)
                 .update({
               "isOpened": true,
-              "openTime": new DateTime.now().millisecondsSinceEpoch
+              "openTime": DateTime.now().millisecondsSinceEpoch
             });
           }
         }
@@ -112,7 +112,7 @@ class _ChatAdminPageState extends State<ChatAdminPage> {
           .add({
         "isOpened": false,
         "message": message,
-        "time": new DateTime.now().millisecondsSinceEpoch,
+        "time": DateTime.now().millisecondsSinceEpoch,
         "uid": widget.document['orderId'],
         "type": "EMPLOYEE"
       }).then((value) {
@@ -219,7 +219,8 @@ class _ChatAdminPageState extends State<ChatAdminPage> {
       // resizeToAvoidBottomInset: false,
       // resizeToAvoidBottomPadding: false,
       appBar: AppBar(
-        title: Text(
+        backgroundColor: Colors.grey,
+        title: const Text(
           'ระบบแชทกับลูกค้า',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
@@ -265,7 +266,7 @@ class _ChatAdminPageState extends State<ChatAdminPage> {
                 ),
                 Text(
                   'แชทกับลูกค้า',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                 ),
                 // FlatButton.icon(
                 //   onPressed: () {
@@ -286,10 +287,10 @@ class _ChatAdminPageState extends State<ChatAdminPage> {
           Padding(
             padding: const EdgeInsets.only(left: 15),
             child: Row(
-              children: [Text('ลูกค้า:${widget.document['email']}')],
+              children: [Text('ลูกค้า:${widget.document['email']}',style: const TextStyle(fontSize: 25),)],
             ),
           ),
-          Divider(),
+          const Divider(),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
                 stream: dbRef

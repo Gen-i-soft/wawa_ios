@@ -24,14 +24,14 @@ class _AdminChatPageState extends State<AdminChatPage> {
           Padding(
             padding: const EdgeInsets.only(left: 20, top: 10, bottom: 20),
             child: Row(
-              children: [
+              children: const [
                 Icon(Icons.chat_bubble_outline_outlined),
                 SizedBox(
                   height: 10,
                 ),
                 Text(
                   'ข้อความลูกค้า',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -50,7 +50,7 @@ class _AdminChatPageState extends State<AdminChatPage> {
 
               if (snapshot.hasError) {
                 print(snapshot.error);
-                return Text('เกิดข้อผิดพลาด');
+                return const Text('เกิดข้อผิดพลาด');
               }
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
@@ -60,7 +60,7 @@ class _AdminChatPageState extends State<AdminChatPage> {
                 default:
                   return ListView(
                     children: snapshot.data!.docs.map((document) {
-                      DateTime date = new DateTime.fromMillisecondsSinceEpoch(
+                      DateTime date = DateTime.fromMillisecondsSinceEpoch(
                           document['time']);
 
                       return  Container(
@@ -75,7 +75,7 @@ class _AdminChatPageState extends State<AdminChatPage> {
                             ));
                           },
                           leading: CircleAvatar(
-                            child: Icon(
+                            child: const Icon(
                               Icons.chat,
                               color: Colors.white,
                             ),
@@ -83,13 +83,13 @@ class _AdminChatPageState extends State<AdminChatPage> {
                           ),
                           title: Wrap(
                             children: [
-                              Text('${document['message']} ',style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),if (document['isOpened'] == false) Image.asset('images/new-24.png',width:24,height:24) else Text('')
+                              Text('${document['message']} ',style: const TextStyle(fontSize: 30,fontWeight: FontWeight.bold)),if (document['isOpened'] == false) Image.asset('images/new-24.png',width:24,height:24) else Text('')
                             ],
                           ),
                           //"displayName": qsBackend.docs[0]['displayName'],
                          
-                          subtitle: document.data().toString().contains('displayName') ?    Text('ลูกค้า: ${document['displayName']} / ${document['email']}') :Text('ลูกค้า: ${document['email']}') ,
-                          trailing: Text('${helper.timestampToTime(date)} น.'),
+                          subtitle: document.data().toString().contains('displayName') ?    Text('ลูกค้า: ${document['displayName']} / ${document['email']}',style: const TextStyle(fontSize: 20),) :Text('ลูกค้า: ${document['email']}',style: const TextStyle(fontSize: 20),) ,
+                          trailing: Text('${helper.timestampToTime(date)} น.',style: const TextStyle(fontSize: 25),),
                         ),
                       );
                     }).toList(),
